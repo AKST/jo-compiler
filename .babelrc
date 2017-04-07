@@ -1,0 +1,11 @@
+{
+  "presets": ["env", "stage-1"],
+  "plugins": [
+    ["babel-plugin-root-import", {
+      "rootPathPrefix": "@",
+      "rootPathSuffix": "src"
+    }],
+    "syntax-flow",
+    "transform-flow-strip-types"
+  ]
+}

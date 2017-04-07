@@ -1,0 +1,13 @@
+[ignore]
+
+[include]
+src/**/*.js
+src/*.js
+
+[libs]
+
+[options]
+suppress_type=$FlowFixMe
+suppress_comment= \\(.\\|\n\\)*\\$FlowTodo
+unsafe.enable_getters_and_setters=true
+module.name_mapper='^\@/\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
