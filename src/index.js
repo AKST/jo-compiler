@@ -1,6 +1,6 @@
 import 'babel-polyfill'
 import withIter from './core/stream'
-import tokens from './pass/tokens'
+import tokens from './pass/lexer'
 
 const program = `
   (log "hello world")
