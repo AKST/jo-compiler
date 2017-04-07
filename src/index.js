@@ -8,5 +8,5 @@ const program = `
 
 const characters = withIter(program[Symbol.iterator]())
 for (const token of tokens(characters)) {
-  console.log(token)
+  console.log(token.toString())
 }

@@ -9,11 +9,15 @@
     "build": "./node_modules/.bin/babel src --out-dir dist --source-maps inline",
     "clean": "rm -rf ./dist"
   },
+  "pre-commit": [
+    "test"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.24.0",
     "babel-eslint": "^7.2.1",
+    "babel-plugin-root-import": "^5.1.0",
     "babel-plugin-syntax-flow": "^6.18.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-polyfill": "^6.23.0",
@@ -26,7 +30,8 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-node": "^4.2.2",
     "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "pre-commit": "^1.2.2"
   },
   "dependencies": {
     "immutable": "^3.8.1"

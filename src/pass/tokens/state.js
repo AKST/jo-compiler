@@ -1,7 +1,12 @@
 // @flow
-import type { Stream } from '@/core/stream'
-import type Token from '@/pass/tokens/data'
+
+import type Token from '@/data/token'
+import type { Maybe } from '@/data/maybe'
+import * as maybe from '@/data/maybe'
+import { Stream, ContStream } from '@/core/stream'
+import { Location, Position } from '@/data/location'
 import { init, set } from '@/core'
+
 
 type Input = Stream<string>
 export type StateProcess = Generator<Token, State, State>
@@ -11,35 +16,57 @@ export type StateBranch = (char: string, state: State) => StateProcess
  * Functional representation of state
  */
 export default class State {
-  stream: Input
-  branch: StateBranch
-  buffer: string
+  _stream: Input
+  _branch: StateBranch
+  _buffer: string
+  _bufStart: Position
+  _bufEnd: Position
 
   constructor (branch: StateBranch, stream: Input) {
-    this.stream = stream
-    this.branch = branch
-    this.buffer = ''
+    this._stream = stream
+    this._branch = branch
+    this._buffer = ''
+    this._bufStart = this._bufEnd = Position.init()
+  }
+
+  get enqueued (): string {
+    return this._buffer
+  }
+
+  get location (): Location {
+    return Location.create(this._bufStart, this._bufEnd)
+  }
+
+  get current (): Maybe<string> {
+    return this._stream instanceof ContStream
+       ? maybe.just(this._stream.value)
+       : maybe.none()
+  }
+
+  dropBuffer (): State {
+    const _buffer = ''
+    const _bufStart = this._bufEnd
+    return set(this, { _buffer, _bufStart })
   }
 
   withBranch (character: string): StateProcess {
-    return this.branch(character, this)
-  }
-
-  current (): Input {
-    return this.stream
+    return this._branch(character, this)
   }
 
   shiftForward (): State {
-    const stream = this.stream.shiftForward()
-    return set(this, { stream })
+    const _stream = this._stream.shiftForward()
+    if (this._stream instanceof ContStream) {
+      const _buffer = this._buffer + this._stream.value
+      const _bufEnd = this._bufEnd.shiftWith(this._stream.value)
+      return set(this, { _stream, _bufEnd, _buffer })
+    }
+    else {
+      return this
+    }
   }
 
-  setBranch (branch: StateBranch): State {
-    return set(this, { branch })
-  }
-
-  enqueue (character: string): State {
-    return set(this, { buffer: this.buffer + character })
+  setBranch (_branch: StateBranch): State {
+    return set(this, { _branch })
   }
 
   static create (stream: Input, branch: StateBranch): State {
