@@ -10,6 +10,7 @@
     "clean": "rm -rf ./dist"
   },
   "pre-commit": [
+    "build",
     "test"
   ],
   "author": "",
