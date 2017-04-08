@@ -10,10 +10,13 @@
     "type": "./node_modules/.bin/flow status",
     "lint": "./node_modules/.bin/eslint src test",
     "test": "./node_modules/.bin/jest",
+    "init": "yarn install && ./node_modules/.bin/flow-typed install",
     "build": "./node_modules/.bin/babel src --out-dir dist/src && ./node_modules/.bin/babel test --out-dir dist/test",
     "clean": "rm -rf ./dist"
   },
-  "pre-commit": ["ci"],
+  "pre-commit": [
+    "ci"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -37,6 +40,7 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "flow-bin": "^0.43.1",
+    "flow-typed": "^2.0.0",
     "jest": "^19.0.2",
     "npm-run-all": "^4.0.2",
     "pre-commit": "^1.2.2"

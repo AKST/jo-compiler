@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   override:
-    - yarn install
+    - yarn run init
   cache_directories:
     - ~/.cache/yarn
 
