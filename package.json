@@ -1,19 +1,19 @@
 {
   "name": "proto-jo",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/src/index.js",
   "scripts": {
+    "ci": "./node_modules/.bin/npm-run-all type lint clean build test",
     "docs": "./node_modules/.bin/documentation build src/** src/* -f html -o docs --document-exported",
-    "exec": "node ./dist/index.js",
-    "test": "flow status && ./node_modules/.bin/eslint src",
-    "build": "./node_modules/.bin/babel src --out-dir dist --source-maps inline",
+    "exec": "node ./dist/src/index.js",
+    "type": "./node_modules/.bin/flow status",
+    "lint": "./node_modules/.bin/eslint src test",
+    "test": "./node_modules/.bin/jest",
+    "build": "./node_modules/.bin/babel src --out-dir dist/src && ./node_modules/.bin/babel test --out-dir dist/test",
     "clean": "rm -rf ./dist"
   },
-  "pre-commit": [
-    "build",
-    "test"
-  ],
+  "pre-commit": ["ci"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -31,14 +31,14 @@
     "eslint-config-standard": "^10.2.0",
     "eslint-plugin-flowtype": "^2.30.4",
     "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jest": "^19.0.1",
     "eslint-plugin-jsdoc": "^3.0.0",
     "eslint-plugin-node": "^4.2.2",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
+    "flow-bin": "^0.43.1",
     "jest": "^19.0.2",
+    "npm-run-all": "^4.0.2",
     "pre-commit": "^1.2.2"
-  },
-  "dependencies": {
-    "immutable": "^3.8.1"
   }
 }

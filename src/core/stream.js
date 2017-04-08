@@ -15,6 +15,11 @@ export default function withIter<T> (iterator: Iterator<T>): Stream<T> {
   }
 }
 
+export function withIterable<T> (iterable: Iterable<T>): Stream<T> {
+  // $FlowTodo: https://github.com/facebook/flow/issues/1163
+  return withIter(iterable[Symbol.iterator]())
+}
+
 /**
  * Turns an iterator into a linked lazy list like structure.
  */

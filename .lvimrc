@@ -1,0 +1,4 @@
+if exists(":NERDTree")
+  call add(NERDTreeIgnore, '^dist')
+  call add(NERDTreeIgnore, '^docs')
+endif

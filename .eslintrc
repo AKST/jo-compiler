@@ -2,8 +2,12 @@
   "parser": "babel-eslint",
   "plugins": [
     "jsdoc",
+    "jest",
     "flowtype",
   ],
+  "env": {
+    "jest/globals": true
+  },
   "extends": "standard",
   "rules": {
     "brace-style": [2, "stroustrup"],
@@ -22,6 +26,9 @@
 
     "spaced-comment": ["error", "always", { "exceptions": ["/"] }],
 
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
 
     "jsdoc/check-param-names": 1,
     "jsdoc/check-tag-names": 1,
