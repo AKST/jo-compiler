@@ -1,0 +1,17 @@
+machine:
+  node:
+    version: 7.3.0
+
+dependencies:
+  override:
+    - yarn install
+    - yarn run build
+  cache_directories:
+    - ~/.cache/yarn
+
+test:
+  override:
+    - yarn run type
+    - yarn run lint
+    - yarn run test
+
