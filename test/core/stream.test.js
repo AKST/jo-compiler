@@ -16,11 +16,24 @@ test('finishes at last character', () => {
   expect(step4.done).toBeTruthy()
 })
 
-
 test('non destructive updates', () => {
   const sInput = 'abc'
   const stream = withIterable(sInput)
   const a = stream.shiftForward().shiftForward()
   const b = stream.shiftForward().shiftForward()
   expect(a).toEqual(b)
+})
+
+test('append', () => {
+  const aStream = withIterable('ab')
+  const bStream = withIterable('cd')
+  let cStream = aStream.append(bStream)
+
+  // moveforwared 3 characters to 'd'
+  for (let i = 0; i < 3; i++) cStream = cStream.shiftForward()
+  expect(cStream.done).toBeFalsy()
+
+  // moveforwared 1 characters
+  cStream = cStream.shiftForward()
+  expect(cStream.done).toBeTruthy()
 })

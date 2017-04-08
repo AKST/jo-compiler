@@ -19,8 +19,8 @@
       "words": true,
       "nonwords": true,
       "overrides": {
-        "--": true,
-        "++": true
+        "--": false,
+        "++": false
       }
     }],
 

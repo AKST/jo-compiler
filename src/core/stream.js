@@ -3,21 +3,28 @@ import type { Maybe } from '@/data/maybe'
 import { just, none } from '@/data/maybe'
 
 export default function withIter<T> (iterator: Iterator<T>): Stream<T> {
-  const { value, done } = iterator.next()
-  if (done) {
-    return new EndStream()
-  }
-  else if (value != null) {
-    return new ContStream(value, iterator)
-  }
-  else {
-    throw new TypeError('invalid iterator')
-  }
+  return _withIter(iterator, null)
 }
 
 export function withIterable<T> (iterable: Iterable<T>): Stream<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/1163
   return withIter(iterable[Symbol.iterator]())
+}
+
+function _withIter<T> (iterator: Iterator<T>, append: ?Stream<T>): Stream<T> {
+  const { value, done } = iterator.next()
+  if (done && append == null) {
+    return new EndStream()
+  }
+  if (done && append != null) {
+    return append
+  }
+  else if (value != null) {
+    return new ContStream(value, iterator, append)
+  }
+  else {
+    throw new TypeError('invalid iterator')
+  }
 }
 
 /**
@@ -31,6 +38,15 @@ export class Stream<T> {
 
   constructor (done: boolean) {
     Object.defineProperty(this, 'done', { writeable: false, value: done })
+  }
+
+  /**
+   * Appends a stream on the the end of another.
+   *
+   * @param more - Additional items.
+   */
+  append (more: Stream<T>): Stream<T> {
+    throw new TypeError('abstract method')
   }
 
   /**
@@ -65,6 +81,10 @@ class EndStream<T> extends Stream<T> {
     return none()
   }
 
+  append (more: Stream<T>): Stream<T> {
+    return more
+  }
+
   /**
    * In an end stream, shiftForward basically returns itself.
    */
@@ -82,16 +102,31 @@ class ContStream<T> extends Stream<T> {
   value: T
   _next: ?Stream<T>
   _iter: Iterator<T>
+  _appended: ?Stream<T>
 
-  constructor (value: T, iterator: Iterator<T>) {
+  constructor (value: T, iterator: Iterator<T>, append: ?Stream<T>) {
     super(false)
     Object.defineProperty(this, 'value', { writeable: false, value: value })
     this._iter = iterator
     this._next = null
+    this._appended = append
   }
 
   current (): Maybe<T> {
     return just(this.value)
+  }
+
+  append (appended: Stream<T>): Stream<T> {
+    if (this._appended == null) {
+      const result = new ContStream(this.value, this._iter, appended)
+      result._next = this._next
+      return result
+    }
+    else {
+      const result = new ContStream(this.value, this._iter, this._appended.append(appended))
+      result._next = this._next
+      return result
+    }
   }
 
   /**
@@ -99,7 +134,7 @@ class ContStream<T> extends Stream<T> {
    */
   shiftForward (): Stream<T> {
     if (this._next == null) {
-      this._next = withIter(this._iter)
+      this._next = _withIter(this._iter, this._appended)
     }
     return this._next
   }
