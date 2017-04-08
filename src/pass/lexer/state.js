@@ -2,8 +2,7 @@
 
 import type Lexicon from '@/data/lex-token'
 import type { Maybe } from '@/data/maybe'
-import * as maybe from '@/data/maybe'
-import { Stream, ContStream } from '@/core/stream'
+import type { Stream } from '@/core/stream'
 import { Location, Position } from '@/data/location'
 import { init, set } from '@/core'
 
@@ -38,9 +37,7 @@ export default class State {
   }
 
   get current (): Maybe<string> {
-    return this._stream instanceof ContStream
-       ? maybe.just(this._stream.value)
-       : maybe.none()
+    return this._stream.current()
   }
 
   dropBuffer (): State {
@@ -55,9 +52,10 @@ export default class State {
 
   shiftForward (): State {
     const _stream = this._stream.shiftForward()
-    if (this._stream instanceof ContStream) {
-      const _buffer = this._buffer + this._stream.value
-      const _bufEnd = this._bufEnd.shiftWith(this._stream.value)
+    const current = this.current
+    if (current.kind === 'just') {
+      const _buffer = this._buffer + current.value
+      const _bufEnd = this._bufEnd.shiftWith(current.value)
       return set(this, { _stream, _bufEnd, _buffer })
     }
     else {

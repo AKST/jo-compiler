@@ -27,7 +27,7 @@ export class LParenLexicon extends Lexicon {
   }
 
   toString (): string {
-    return `LParenLexicon { }`
+    return `LParenLexicon {}`
   }
 }
 
@@ -40,7 +40,7 @@ export class RParenLexicon extends Lexicon {
   }
 
   toString (): string {
-    return `RParenLexicon { }`
+    return `RParenLexicon {}`
   }
 }
 
@@ -56,7 +56,7 @@ export class IdentifierLexicon extends Lexicon {
   }
 
   toString (): string {
-    return `IdentifierLexicon { identifier = '${this.identifier}' }`
+    return `IdentifierLexicon { identifier: '${this.identifier}' }`
   }
 }
 
@@ -72,7 +72,7 @@ export class StringLexicon extends Lexicon {
   }
 
   toString (): string {
-    return `PlainStringLexicon { content = '${this.contents}' }`
+    return `StringLexicon { content: '${this.contents}' }`
   }
 }
 

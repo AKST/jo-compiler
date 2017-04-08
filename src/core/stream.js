@@ -1,4 +1,7 @@
 // @flow
+import type { Maybe } from '@/data/maybe'
+import { just, none } from '@/data/maybe'
+
 export default function withIter<T> (iterator: Iterator<T>): Stream<T> {
   const { value, done } = iterator.next()
   if (done) {
@@ -16,6 +19,9 @@ export default function withIter<T> (iterator: Iterator<T>): Stream<T> {
  * Turns an iterator into a linked lazy list like structure.
  */
 export class Stream<T> {
+  /**
+   * Whether or not he stream has reached the end
+   */
   done: boolean
 
   constructor (done: boolean) {
@@ -23,9 +29,17 @@ export class Stream<T> {
   }
 
   /**
-   * The default implementation on this doesn't do much, other
-   * than throwing an error, but once overriden it's intended
-   * to represent the operation of moving forward.
+   * If not at the end of the stream, it'll return
+   * the current value of the current link.
+   */
+  current (): Maybe<T> {
+    throw new TypeError('abstract method')
+  }
+
+  /**
+   * Unless at the end of the stream, this will shift
+   * the stream forward, and return the next link the
+   * stream.
    */
   shiftForward (): Stream<T> {
     throw new TypeError('abstract method')
@@ -35,10 +49,15 @@ export class Stream<T> {
 
 /**
  * The end of a stream.
+ * @access private
  */
-export class EndStream<T> extends Stream<T> {
+class EndStream<T> extends Stream<T> {
   constructor () {
     super(true)
+  }
+
+  current (): Maybe<T> {
+    return none()
   }
 
   /**
@@ -52,8 +71,9 @@ export class EndStream<T> extends Stream<T> {
 
 /**
  * A stream with more items.
+ * @access private
  */
-export class ContStream<T> extends Stream<T> {
+class ContStream<T> extends Stream<T> {
   value: T
   _next: ?Stream<T>
   _iter: Iterator<T>
@@ -63,6 +83,10 @@ export class ContStream<T> extends Stream<T> {
     Object.defineProperty(this, 'value', { writeable: false, value: value })
     this._iter = iterator
     this._next = null
+  }
+
+  current (): Maybe<T> {
+    return just(this.value)
   }
 
   /**
