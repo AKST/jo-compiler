@@ -14,9 +14,6 @@
     "build": "./node_modules/.bin/babel src --out-dir dist/src && ./node_modules/.bin/babel test --out-dir dist/test",
     "clean": "rm -rf ./dist"
   },
-  "pre-commit": [
-    "ci"
-  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
