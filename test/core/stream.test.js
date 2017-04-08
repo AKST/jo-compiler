@@ -24,10 +24,10 @@ test('non destructive updates', () => {
   expect(a).toEqual(b)
 })
 
-test('append', () => {
+test('extend', () => {
   const aStream = withIterable('ab')
   const bStream = withIterable('cd')
-  let cStream = aStream.append(bStream)
+  let cStream = aStream.extend(bStream)
 
   // moveforwared 3 characters to 'd'
   for (let i = 0; i < 3; i++) cStream = cStream.shiftForward()

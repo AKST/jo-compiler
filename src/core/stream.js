@@ -11,16 +11,16 @@ export function withIterable<T> (iterable: Iterable<T>): Stream<T> {
   return withIter(iterable[Symbol.iterator]())
 }
 
-function _withIter<T> (iterator: Iterator<T>, append: ?Stream<T>): Stream<T> {
+function _withIter<T> (iterator: Iterator<T>, extention: ?Stream<T>): Stream<T> {
   const { value, done } = iterator.next()
-  if (done && append == null) {
+  if (done && extention == null) {
     return new EndStream()
   }
-  if (done && append != null) {
-    return append
+  if (done && extention != null) {
+    return extention
   }
   else if (value != null) {
-    return new ContStream(value, iterator, append)
+    return new ContStream(value, iterator, extention)
   }
   else {
     throw new TypeError('invalid iterator')
@@ -45,7 +45,7 @@ export class Stream<T> {
    *
    * @param more - Additional items.
    */
-  append (more: Stream<T>): Stream<T> {
+  extend (more: Stream<T>): Stream<T> {
     throw new TypeError('abstract method')
   }
 
@@ -81,7 +81,7 @@ class EndStream<T> extends Stream<T> {
     return none()
   }
 
-  append (more: Stream<T>): Stream<T> {
+  extend (more: Stream<T>): Stream<T> {
     return more
   }
 
@@ -102,28 +102,28 @@ class ContStream<T> extends Stream<T> {
   value: T
   _next: ?Stream<T>
   _iter: Iterator<T>
-  _appended: ?Stream<T>
+  _extention: ?Stream<T>
 
-  constructor (value: T, iterator: Iterator<T>, append: ?Stream<T>) {
+  constructor (value: T, iterator: Iterator<T>, extention: ?Stream<T>) {
     super(false)
     Object.defineProperty(this, 'value', { writeable: false, value: value })
     this._iter = iterator
     this._next = null
-    this._appended = append
+    this._extention = extention
   }
 
   current (): Maybe<T> {
     return just(this.value)
   }
 
-  append (appended: Stream<T>): Stream<T> {
-    if (this._appended == null) {
-      const result = new ContStream(this.value, this._iter, appended)
+  extend (extention: Stream<T>): Stream<T> {
+    if (this._extention == null) {
+      const result = new ContStream(this.value, this._iter, extention)
       result._next = this._next
       return result
     }
     else {
-      const result = new ContStream(this.value, this._iter, this._appended.append(appended))
+      const result = new ContStream(this.value, this._iter, this._extention.extend(extention))
       result._next = this._next
       return result
     }
@@ -134,7 +134,7 @@ class ContStream<T> extends Stream<T> {
    */
   shiftForward (): Stream<T> {
     if (this._next == null) {
-      this._next = _withIter(this._iter, this._appended)
+      this._next = _withIter(this._iter, this._extention)
     }
     return this._next
   }
