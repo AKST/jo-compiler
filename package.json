@@ -3,17 +3,6 @@
   "version": "0.0.1",
   "description": "",
   "main": "./dist/src/index.js",
-  "scripts": {
-    "ci": "./node_modules/.bin/npm-run-all type lint clean build test",
-    "docs": "./node_modules/.bin/documentation build src/** src/* -f html -o docs --document-exported",
-    "exec": "node ./dist/src/index.js",
-    "type": "./node_modules/.bin/flow status",
-    "lint": "./node_modules/.bin/eslint src test",
-    "test": "./node_modules/.bin/jest",
-    "init": "yarn install && ./node_modules/.bin/flow-typed install",
-    "build": "./node_modules/.bin/babel src --out-dir dist/src && ./node_modules/.bin/babel test --out-dir dist/test",
-    "clean": "rm -rf ./dist"
-  },
   "author": "",
   "license": "MIT",
   "devDependencies": {

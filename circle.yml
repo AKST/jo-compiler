@@ -4,11 +4,11 @@ machine:
 
 dependencies:
   override:
-    - yarn run init
+    - make init
   cache_directories:
     - ~/.cache/yarn
 
 test:
   override:
-    - yarn run ci
+    - make ci
 

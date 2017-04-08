@@ -7,7 +7,7 @@ bit of overhead so I've sided to write it in Javascript.
 ## Dev Setup
 
 ```
-yarn run init
+make init
 ```
 
 ## Testings
@@ -17,5 +17,5 @@ linting as well as type checking on the source code, rebuild
 the source then run the tests.
 
 ```
-yarn run ci
+make ci
 ```
