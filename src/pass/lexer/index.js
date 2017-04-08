@@ -94,7 +94,7 @@ function* branchString (character: string, state: State): StateProcess {
     const content = state.enqueued
     const shifted = state.shiftForward()
     const location = shifted.location
-    yield init(tokens.PlainStringLexicon, content, location)
+    yield init(tokens.StringLexicon, content, location)
     return shifted.dropBuffer().setBranch(branchInit)
   }
 }

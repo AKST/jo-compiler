@@ -6,9 +6,11 @@ import type Location from '@/data/location'
  */
 export default class Lexicon {
   location: Location
+  kind: string
 
-  constructor (location: Location) {
+  constructor (location: Location, kind: string) {
     this.location = location
+    this.kind = kind
   }
 
   toString (): string {
@@ -20,6 +22,10 @@ export default class Lexicon {
  * Lexical token that represent an opening paren
  */
 export class LParenLexicon extends Lexicon {
+  constructor (location: Location) {
+    super(location, 'left-paren')
+  }
+
   toString (): string {
     return `LParenLexicon { }`
   }
@@ -29,6 +35,10 @@ export class LParenLexicon extends Lexicon {
  * Lexical token that represent an closing paren
  */
 export class RParenLexicon extends Lexicon {
+  constructor (location: Location) {
+    super(location, 'right-paren')
+  }
+
   toString (): string {
     return `RParenLexicon { }`
   }
@@ -41,28 +51,28 @@ export class IdentifierLexicon extends Lexicon {
   identifier: string
 
   constructor (identifier: string, location: Location) {
-    super(location)
+    super(location, 'identifier')
     this.identifier = identifier
   }
 
   toString (): string {
-    return `IdentifierLexicon { identifier = "${this.identifier}" }`
+    return `IdentifierLexicon { identifier = '${this.identifier}' }`
   }
 }
 
 /**
  * Lexical token that represents a normal string
  */
-export class PlainStringLexicon extends Lexicon {
+export class StringLexicon extends Lexicon {
   contents: string
 
   constructor (contents: string, location: Location) {
-    super(location)
+    super(location, 'string')
     this.contents = contents
   }
 
   toString (): string {
-    return `PlainStringLexicon { content = "${this.contents}" }`
+    return `PlainStringLexicon { content = '${this.contents}' }`
   }
 }
 
@@ -70,15 +80,15 @@ export class PlainStringLexicon extends Lexicon {
  * Lexical token that represents whitespace
  */
 export class WhiteSpaceLexicon extends Lexicon {
-  number: number
+  length: number
 
-  constructor (size: number, location: Location) {
-    super(location)
-    this.number = size
+  constructor (length: number, location: Location) {
+    super(location, 'whitespace')
+    this.length = length
   }
 
   toString (): string {
-    return `WhiteSpaceLexicon { number: ${this.number} }`
+    return `WhiteSpaceLexicon { length: ${this.length} }`
   }
 }
 
