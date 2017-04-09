@@ -1,19 +1,20 @@
 import 'babel-polyfill'
+import { Unimplemented } from '@/error'
+import getConfig from '@/core/args'
+import debug from '@/core/debug'
 
-import getConfig from '@/init/args'
-import { readStream } from '@/util/io'
-import { tokenStream } from '@/pass/lexer'
-import { parseModule } from '@/pass/parse'
+(async function () {
+  const config = getConfig()
 
-const config = getConfig()
-
-config.files.forEach(async fileName => {
   try {
-    const tokens = tokenStream(readStream(fileName))
-    const module = await parseModule(tokens)
-    console.log(module.toJSON(2))
+    if (! config.debugMode) throw new Unimplemented('normal build')
+
+    const result = await debug(config.debugMode, config)
+    console.log(JSON.stringify(result, function (key, value) {
+      return key === 'location' ? undefined : value
+    }, 1))
   }
   catch (error) {
-    console.log(error.toJSON(true))
+    console.log(JSON.stringify(error, null, 1))
   }
-})
+}())

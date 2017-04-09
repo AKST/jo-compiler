@@ -20,13 +20,17 @@ function validDebugMode (mode: ?string): ?DebugMode {
 /**
  * Configuration state
  */
-class Config {
+export class Config {
   _files: Files
   _debugMode: ?DebugMode
 
   constructor (files: Files, debugMode: ?DebugMode) {
     this._files = files
     this._debugMode = debugMode
+  }
+
+  get debugMode (): ?DebugMode {
+    return this._debugMode
   }
 
   get files (): Files {

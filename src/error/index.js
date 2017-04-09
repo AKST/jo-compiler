@@ -19,7 +19,7 @@ export default class JoError {
    *
    * @param indent - Whether or not to pretty print.
    */
-  toJSON (indent: boolean): string {
+  toJSON (indent: boolean): Object {
     const { code, message, ...other } = this
     const shape: JSONShape = { meta: { code, message } }
 
@@ -27,9 +27,7 @@ export default class JoError {
       shape.data = other
     }
 
-    return indent
-      ? JSON.stringify(shape, null, '  ')
-      : JSON.stringify(shape)
+    return shape
   }
 }
 
