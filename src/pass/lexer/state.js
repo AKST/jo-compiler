@@ -1,9 +1,9 @@
 // @flow
 import type Lexicon from '@/data/lex-token'
 import type { Maybe } from '@/data/maybe'
-import type { Stream } from '@/core/stream'
+import type { Stream } from '@/data/stream'
 import { Location, Position } from '@/data/location'
-import { init, set } from '@/core'
+import { init, set } from '@/util/data'
 
 
 type Input = Stream<string>

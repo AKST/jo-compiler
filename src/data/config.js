@@ -1,5 +1,5 @@
 // @flow
-import { init } from '@/core'
+import { init } from '@/util/data'
 
 type Files = Array<string>
 
@@ -10,8 +10,11 @@ export type ConfigDescriptor = {
 
 export type DebugMode = 'lexer' | 'parse'
 
-export function fromArgs (config: ConfigDescriptor): Config {
-  return init(Config, config.input, config.debug)
+function validDebugMode (mode: ?string): ?DebugMode {
+  if (mode == null) return null
+  if (mode === 'lexer') return mode
+  if (mode === 'parse') return mode
+  throw new TypeError('invalid debug mode specified')
 }
 
 class Config {
@@ -25,6 +28,11 @@ class Config {
 
   get files (): Files {
     return [...this._files]
+  }
+
+  static create (config: ConfigDescriptor): Config {
+    const mode = validDebugMode(config.debug)
+    return init(Config, config.input, mode)
   }
 }
 

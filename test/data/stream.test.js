@@ -1,5 +1,5 @@
 // @flow
-import { withIterable } from '@/core/stream'
+import { withIterable } from '@/data/stream'
 
 test('finishes at last character', () => {
   const sInput = 'abc'

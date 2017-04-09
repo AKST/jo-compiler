@@ -1,8 +1,8 @@
 // @flow
-import type { Stream } from '@/core/stream'
+import type { Stream } from '@/data/stream'
 import type { StateProcess } from '@/pass/lexer/state'
 
-import { init } from '@/core'
+import { init } from '@/util/data'
 import * as error from '@/pass/lexer/error'
 import State from '@/pass/lexer/state'
 import * as tokens from '@/data/lex-token'

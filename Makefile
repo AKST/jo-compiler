@@ -1,3 +1,5 @@
+default: build
+
 ci: type lint test
 
 init: node_modules flow-typed
@@ -34,4 +36,4 @@ clean:
 	rm -rf dist
 	rm -rf docs
 
-.PHONY: watch ci init build clean docs type lint test
+.PHONY: default watch ci init build clean docs type lint test

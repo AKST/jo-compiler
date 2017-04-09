@@ -1,5 +1,5 @@
 // @flow
-import { init, set } from '@/core'
+import { init, set } from '@/util/data'
 
 export class Position {
   line: number

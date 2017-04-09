@@ -1,6 +1,6 @@
 // @flow
 import parseCLI from 'command-line-args'
-import { fromArgs, T as Config } from '@/data/config'
+import Config from '@/data/config'
 
 const cliConfig = [
   { name: 'input', type: String, multiple: true, defaultOption: true },
@@ -9,8 +9,6 @@ const cliConfig = [
 
 export default function getConfig (): Config {
   const { input: _input, debug } = parseCLI(cliConfig)
-  return fromArgs({
-    debug,
-    input: _input || []
-  })
+  const input = _input || []
+  return Config.create({ debug, input })
 }
