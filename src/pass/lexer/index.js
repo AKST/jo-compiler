@@ -2,7 +2,8 @@
 import type Token from '@/data/lex-token'
 import type { StateProcess } from '@/pass/lexer/state'
 
-import { withIterable, T as Stream } from '@/data/stream-sync'
+import { withIterable as initSyncStream, T as SyncStream } from '@/data/stream-sync'
+import { withIterable as initAsyncStream, T as AsyncStream } from '@/data/stream-async'
 import * as tokens from '@/data/lex-token'
 import { init } from '@/util/data'
 import * as error from '@/pass/lexer/error'
@@ -13,7 +14,7 @@ import State from '@/pass/lexer/state'
  * functions exported by this module.
  */
 export function initialState (): State {
-  return State.create(withIterable(), branchInit)
+  return State.create(initSyncStream(), branchInit)
 }
 
 /**
@@ -21,9 +22,11 @@ export function initialState (): State {
  * the stream, until it reaches the end of the stream.
  *
  * @param input - A stream of strings.
+ *
+ * @returns An immutable async stream of Tokens.
  */
-export function tokenStream (input: AsyncIterable<string>): AsyncIterable<Token> {
-  return asyncLoop(initialState(), input)
+export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
+  return initAsyncStream(asyncLoop(initialState(), input))
 }
 
 async function* asyncLoop (state: State, iterator: AsyncIterable<string>): AsyncIterable<Token> {
@@ -34,7 +37,7 @@ async function* asyncLoop (state: State, iterator: AsyncIterable<string>): Async
     throw new error.EmptyInputError()
   }
   else if (! done) {
-    const stream = withIterable(value)
+    const stream = initSyncStream(value)
     // $FlowTodo
     const update = yield * withState(state, stream)
     yield * asyncLoop(update, iterator)
@@ -54,7 +57,7 @@ async function* asyncLoop (state: State, iterator: AsyncIterable<string>): Async
  * the iterator, which can be passed back into this function for
  * additional input.
  */
-export function withState (state: State, stream: Stream<string>): StateProcess {
+export function withState (state: State, stream: SyncStream<string>): StateProcess {
   return loop(state.addInput(stream))
 }
 

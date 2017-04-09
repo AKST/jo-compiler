@@ -29,19 +29,37 @@ export function set<A, B> (original: A, update: B): A {
  * being initialised.
  *
  * @param args - Arguments being based to the constructor.
+ *
+ * @returns An immutable instance of the constructor.
  */
 export function init<T> (Contructor: $FlowFixMe, ...args: Array<any>): T {
   const instance = new Contructor(...args)
   return Object.freeze(instance)
 }
 
+/**
+ * Due to dodginess with flow's typechecker I can't actually
+ * get an iterator instance using the computed property.
+ *
+ * @param iterable - An item with an iterator.
+ *
+ * @returns The iterator of the iterable.
+ */
 export function iter<T> (iterable: Iterable<T>): Iterator<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/2286
   return iterable[Symbol.iterator]()
 }
 
-export function asyncIter<T> (iterable: AsyncIterable<T>): AsyncIterator<T> {
+/**
+ * Due to dodginess with flow's typechecker I can't actually
+ * get an asyncIterator instance using the computed property.
+ *
+ * @param asyncIterable - An item with an iterator key.
+ *
+ * @returns The async iterator of the asyncIterable.
+ */
+export function asyncIter<T> (asyncIterable: AsyncIterable<T>): AsyncIterator<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/2286
-  return iterable[Symbol.asyncIterator]()
+  return asyncIterable[Symbol.asyncIterator]()
 }
 
