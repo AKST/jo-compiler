@@ -2,7 +2,9 @@ default: build
 
 ci: type lint test
 
-init: node_modules flow-typed
+init:
+	yarn install
+	./node_modules/.bin/flow-typed install
 
 node_modules:
 	yarn install

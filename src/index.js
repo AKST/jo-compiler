@@ -9,7 +9,7 @@ const config = getConfig()
 config.files.forEach(async fileName => {
   console.log(`Tokens for '${fileName}'`)
 
-  // emit all the tokens from the stream
+  // emit all the lexical tokens from the stream
   for await (const token of tokenStream(readStream(fileName))) {
     console.log(`  token: ${token.toString()}`)
   }
