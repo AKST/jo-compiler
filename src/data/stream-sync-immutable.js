@@ -30,7 +30,7 @@ function _withIter<T> (iterator: Iterator<T>, extention: ?Stream<T>): Stream<T> 
 /**
  * Turns an iterator into a linked lazy list like structure.
  */
-export class Stream<T> {
+class Stream<T> {
   /**
    * Whether or not he stream has reached the end
    */
@@ -139,3 +139,5 @@ class ContStream<T> extends Stream<T> {
     return this._next
   }
 }
+
+export const T = Stream
