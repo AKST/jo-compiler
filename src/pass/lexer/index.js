@@ -14,7 +14,7 @@ import State from '@/pass/lexer/state'
  * functions exported by this module.
  */
 export function initialState (): State {
-  return State.create(withIterable(''), branchInit)
+  return State.create(withIterable(), branchInit)
 }
 
 /**

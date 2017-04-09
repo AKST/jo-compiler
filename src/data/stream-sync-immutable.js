@@ -6,9 +6,9 @@ export default function withIter<T> (iterator: Iterator<T>): Stream<T> {
   return _withIter(iterator, null)
 }
 
-export function withIterable<T> (iterable: Iterable<T>): Stream<T> {
+export function withIterable<T> (iterable: ?Iterable<T>): Stream<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/1163
-  return withIter(iterable[Symbol.iterator]())
+  return iterable != null ? withIter(iterable[Symbol.iterator]()) : new EndStream()
 }
 
 function _withIter<T> (iterator: Iterator<T>, extention: ?Stream<T>): Stream<T> {
