@@ -17,6 +17,9 @@ function validDebugMode (mode: ?string): ?DebugMode {
   throw new TypeError('invalid debug mode specified')
 }
 
+/**
+ * Configuration state
+ */
 class Config {
   _files: Files
   _debugMode: ?DebugMode
@@ -36,6 +39,9 @@ class Config {
   }
 }
 
+/**
+ * @access private
+ */
 export const T = Config
 
 export default Config

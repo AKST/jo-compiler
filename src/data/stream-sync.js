@@ -5,6 +5,10 @@ import { iter } from '@/util/data'
 
 /**
  * Makes a SyncStream from an iterator.
+ *
+ * @param iterator - An iterator to make a stream from.
+ *
+ * @returns A stream.
  */
 export default function withIter<T> (iterator: Iterator<T>): SyncStream<T> {
   return _withIter(iterator, null)
@@ -12,6 +16,10 @@ export default function withIter<T> (iterator: Iterator<T>): SyncStream<T> {
 
 /**
  * Makes a SyncStream from an Iterable.
+ *
+ * @param iterable - An iterable to make a stream from.
+ *
+ * @returns A stream.
  */
 export function withIterable<T> (iterable: ?Iterable<T>): SyncStream<T> {
   return iterable != null
