@@ -2,14 +2,14 @@
 import type { Maybe } from '@/data/maybe'
 import { just, none } from '@/data/maybe'
 
-export function withIterable<T> (iterable: AsyncIterable<T>): Stream<T> {
+export function withIterable<T> (iterable: AsyncIterable<T>): AsyncStream<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/1163
   return _withIter(iterable[Symbol.asyncIterator]())
 }
 
 
-function _withIter<T> (iterator: AsyncIterator<T>, extention: ?Stream<T>): Stream<T> {
-  return new Stream(iterator, extention)
+function _withIter<T> (iterator: AsyncIterator<T>, extention: ?AsyncStream<T>): AsyncStream<T> {
+  return new AsyncStream(iterator, extention)
 }
 
 // interal state of the stream
@@ -24,7 +24,7 @@ type Current<T> = { kind: 'deferred' }
  *
  * @access public
  */
-class Stream<T> {
+export class AsyncStream<T> {
   /**
    * This will only be calculated once!
    *
@@ -37,16 +37,20 @@ class Stream<T> {
    *
    * @access private
    */
-  _next: ?Stream<T>
+  _next: ?AsyncStream<T>
 
   /**
    *
    * @access private
    */
   _iter: AsyncIterator<T>
-  _extention: ?Stream<T>
 
-  constructor (iterator: AsyncIterator<T>, extention: ?Stream<T>) {
+  /**
+   * @access private
+   */
+  _extention: ?AsyncStream<T>
+
+  constructor (iterator: AsyncIterator<T>, extention: ?AsyncStream<T>) {
     this._current = { kind: 'deferred' }
     this._next = null
 
@@ -54,6 +58,9 @@ class Stream<T> {
     Object.defineProperty(this, '_extention', { writeable: false, value: extention })
   }
 
+  /**
+   * @access private
+   */
   async __computed (): Promise<Maybe<T>> {
     switch (this._current.kind) {
       // if defered we'll calculate the result and
@@ -104,7 +111,7 @@ class Stream<T> {
    *
    * @access private
    */
-  async __focusOn (): Promise<Stream<T>> {
+  async __focusOn (): Promise<AsyncStream<T>> {
     const result = await this.__computed()
     if (result.kind === 'none' && this._extention != null) {
       return this._extention.__focusOn()
@@ -122,16 +129,16 @@ class Stream<T> {
     return this.__focusOn().then(stream => stream.__computed())
   }
 
-  extend (extention: Stream<T>): Stream<T> {
+  extend (extention: AsyncStream<T>): AsyncStream<T> {
     // it's important we copy over the val
     if (this._extention == null) {
-      const result = new Stream(this._iter, extention)
+      const result = new AsyncStream(this._iter, extention)
       result._current = this._current
       result._next = this._next
       return result
     }
     else {
-      const result = new Stream(this._iter, this._extention.extend(extention))
+      const result = new AsyncStream(this._iter, this._extention.extend(extention))
       result._current = this._current
       result._next = this._next
       return result
@@ -141,10 +148,13 @@ class Stream<T> {
   /**
    * Returns the next link in the iterator stream.
    */
-  async shiftForward (): Promise<Stream<T>> {
+  async shiftForward (): Promise<AsyncStream<T>> {
     const self = await this.__focusOn()
     return self._next == null ? self : self._next
   }
 }
 
-export const T = Stream
+/**
+ * @access private
+ */
+export const T = AsyncStream

@@ -1,17 +1,25 @@
 // @flow
 import type { Maybe } from '@/data/maybe'
 import { just, none } from '@/data/maybe'
+import { iter } from '@/util/data'
 
-export default function withIter<T> (iterator: Iterator<T>): Stream<T> {
+/**
+ * Makes a SyncStream from an iterator.
+ */
+export default function withIter<T> (iterator: Iterator<T>): SyncStream<T> {
   return _withIter(iterator, null)
 }
 
-export function withIterable<T> (iterable: ?Iterable<T>): Stream<T> {
-  // $FlowTodo: https://github.com/facebook/flow/issues/1163
-  return iterable != null ? withIter(iterable[Symbol.iterator]()) : new EndStream()
+/**
+ * Makes a SyncStream from an Iterable.
+ */
+export function withIterable<T> (iterable: ?Iterable<T>): SyncStream<T> {
+  return iterable != null
+    ? withIter(iter(iterable))
+    : new EndStream()
 }
 
-function _withIter<T> (iterator: Iterator<T>, extention: ?Stream<T>): Stream<T> {
+function _withIter<T> (iterator: Iterator<T>, extention: ?SyncStream<T>): SyncStream<T> {
   const { value, done } = iterator.next()
   if (done && extention == null) {
     return new EndStream()
@@ -30,7 +38,7 @@ function _withIter<T> (iterator: Iterator<T>, extention: ?Stream<T>): Stream<T> 
 /**
  * Turns an iterator into a linked lazy list like structure.
  */
-class Stream<T> {
+export class SyncStream<T> {
   /**
    * Whether or not he stream has reached the end
    */
@@ -45,7 +53,7 @@ class Stream<T> {
    *
    * @param more - Additional items.
    */
-  extend (more: Stream<T>): Stream<T> {
+  extend (more: SyncStream<T>): SyncStream<T> {
     throw new TypeError('abstract method')
   }
 
@@ -62,7 +70,7 @@ class Stream<T> {
    * the stream forward, and return the next link the
    * stream.
    */
-  shiftForward (): Stream<T> {
+  shiftForward (): SyncStream<T> {
     throw new TypeError('abstract method')
   }
 }
@@ -72,7 +80,7 @@ class Stream<T> {
  * The end of a stream.
  * @access private
  */
-class EndStream<T> extends Stream<T> {
+class EndStream<T> extends SyncStream<T> {
   constructor () {
     super(true)
   }
@@ -81,14 +89,14 @@ class EndStream<T> extends Stream<T> {
     return none()
   }
 
-  extend (more: Stream<T>): Stream<T> {
+  extend (more: SyncStream<T>): SyncStream<T> {
     return more
   }
 
   /**
    * In an end stream, shiftForward basically returns itself.
    */
-  shiftForward (): Stream<T> {
+  shiftForward (): SyncStream<T> {
     return this
   }
 }
@@ -98,13 +106,13 @@ class EndStream<T> extends Stream<T> {
  * A stream with more items.
  * @access private
  */
-class ContStream<T> extends Stream<T> {
+class ContStream<T> extends SyncStream<T> {
   value: T
-  _next: ?Stream<T>
+  _next: ?SyncStream<T>
   _iter: Iterator<T>
-  _extention: ?Stream<T>
+  _extention: ?SyncStream<T>
 
-  constructor (value: T, iterator: Iterator<T>, extention: ?Stream<T>) {
+  constructor (value: T, iterator: Iterator<T>, extention: ?SyncStream<T>) {
     super(false)
     Object.defineProperty(this, 'value', { writeable: false, value: value })
     this._iter = iterator
@@ -116,7 +124,7 @@ class ContStream<T> extends Stream<T> {
     return just(this.value)
   }
 
-  extend (extention: Stream<T>): Stream<T> {
+  extend (extention: SyncStream<T>): SyncStream<T> {
     if (this._extention == null) {
       const result = new ContStream(this.value, this._iter, extention)
       result._next = this._next
@@ -132,7 +140,7 @@ class ContStream<T> extends Stream<T> {
   /**
    * Returns the next link in the iterator stream.
    */
-  shiftForward (): Stream<T> {
+  shiftForward (): SyncStream<T> {
     if (this._next == null) {
       this._next = _withIter(this._iter, this._extention)
     }
@@ -140,4 +148,7 @@ class ContStream<T> extends Stream<T> {
   }
 }
 
-export const T = Stream
+/**
+ * @access private
+ */
+export const T = SyncStream
