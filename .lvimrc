@@ -1,4 +1,6 @@
 if exists(":NERDTree")
   call add(NERDTreeIgnore, '^dist')
+  call add(NERDTreeIgnore, '^node_modules')
+  call add(NERDTreeIgnore, '^flow-typed')
   call add(NERDTreeIgnore, '^docs')
 endif

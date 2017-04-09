@@ -1,5 +1,4 @@
 // @flow
-
 import type Lexicon from '@/data/lex-token'
 import type { Maybe } from '@/data/maybe'
 import type { Stream } from '@/core/stream'
@@ -65,6 +64,11 @@ export default class State {
 
   setBranch (_branch: StateBranch): State {
     return set(this, { _branch })
+  }
+
+  addInput (input: Input): State {
+    const _stream = this._stream.extend(input)
+    return set(this, { _stream })
   }
 
   static create (stream: Input, branch: StateBranch): State {

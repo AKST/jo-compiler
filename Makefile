@@ -14,7 +14,7 @@ build: node_modules
 test: node_modules
 	./node_modules/.bin/jest
 
-type: flow-typed node_modules
+type: node_modules
 	./node_modules/.bin/flow status
 
 lint: node_modules
