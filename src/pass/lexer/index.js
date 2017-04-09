@@ -1,9 +1,8 @@
 // @flow
-import type { T as Stream } from '@/data/stream-sync-immutable'
 import type Token from '@/data/lex-token'
 import type { StateProcess } from '@/pass/lexer/state'
 
-import { withIterable } from '@/data/stream-sync-immutable'
+import { withIterable, T as Stream } from '@/data/stream-sync'
 import * as tokens from '@/data/lex-token'
 import { init } from '@/util/data'
 import * as error from '@/pass/lexer/error'

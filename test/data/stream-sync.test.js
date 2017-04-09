@@ -1,5 +1,5 @@
 // @flow
-import { withIterable } from '@/data/stream-sync-immutable'
+import { withIterable } from '@/data/stream-sync'
 
 test('finishes at last character', () => {
   const sInput = 'abc'

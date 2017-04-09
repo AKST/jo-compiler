@@ -1,0 +1,48 @@
+// @flow
+import { withIterable } from '@/data/stream-async'
+
+async function* asyncIter<T> (self: Iterable<T>): AsyncIterator<T> {
+  for (const it of self) yield it
+}
+
+
+type Test = Promise<any>
+
+
+test('finishes at last character', async (): Test => {
+  const sInput = asyncIter('abc')
+  const step1 = withIterable(sInput)
+
+  expect(await step1.done).toBeFalsy()
+
+  const step2 = await step1.shiftForward()
+  expect(await step2.done).toBeFalsy()
+
+  const step3 = await step2.shiftForward()
+  expect(await step3.done).toBeFalsy()
+
+  const step4 = await step3.shiftForward()
+  expect(await step4.done).toBeTruthy()
+})
+
+test('non destructive updates', async (): Test => {
+  const sInput = asyncIter('abc')
+  const stream = withIterable(sInput)
+  const a = await (await stream.shiftForward()).shiftForward()
+  const b = await (await stream.shiftForward()).shiftForward()
+  expect(a).toEqual(b)
+})
+
+test('extend', async (): Test => {
+  const aStream = withIterable(asyncIter('ab'))
+  const bStream = withIterable(asyncIter('cd'))
+  let cStream = aStream.extend(bStream)
+
+  // moveforwared 3 characters to 'd'
+  for (let i = 0; i < 3; i++) cStream = await cStream.shiftForward()
+  expect(await cStream.done).toBeFalsy()
+
+  // moveforwared 1 characters
+  cStream = await cStream.shiftForward()
+  expect(await cStream.done).toBeTruthy()
+})
