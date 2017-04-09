@@ -4,18 +4,13 @@ import getConfig from '@/init/args'
 import { readStream } from '@/util/io'
 import { tokenStream } from '@/pass/lexer'
 
-(async function () {
-  try {
-    const config = getConfig()
+const config = getConfig()
 
-    for (const fileName of config.files) {
-      console.log(`Tokens for '${fileName}'`)
-      for await (const token of tokenStream(readStream(fileName))) {
-        console.log(`  token: ${token.toString()}`)
-      }
-    }
+config.files.forEach(async fileName => {
+  console.log(`Tokens for '${fileName}'`)
+
+  // emit all the tokens from the stream
+  for await (const token of tokenStream(readStream(fileName))) {
+    console.log(`  token: ${token.toString()}`)
   }
-  catch (error) {
-    console.error(error)
-  }
-}())
+})
