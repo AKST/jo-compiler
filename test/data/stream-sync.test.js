@@ -1,5 +1,6 @@
 // @flow
 import { withIterable } from '@/data/stream-sync'
+import { iter as getIter } from '@/util/data'
 
 test('finishes at last character', () => {
   const sInput = 'abc'
@@ -36,4 +37,14 @@ test('extend', () => {
   // moveforwared 1 characters
   cStream = cStream.shiftForward()
   expect(cStream.done).toBeTruthy()
+})
+
+test('implementes iterator', () => {
+  const sInput = 'abc'
+  const stream = withIterable(sInput)
+  const iter = getIter(stream)
+  expect(iter.next().value).toEqual('a')
+  expect(iter.next().value).toEqual('b')
+  expect(iter.next().value).toEqual('c')
+  expect(iter.next().value).toEqual(undefined)
 })

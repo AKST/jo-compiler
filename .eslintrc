@@ -25,7 +25,7 @@
       }
     }],
 
-    "spaced-comment": ["error", "always", { "exceptions": ["/"] }],
+    "spaced-comment": ["error", "always", { "exceptions": ["/", ":"] }],
 
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",

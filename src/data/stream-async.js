@@ -152,6 +152,25 @@ export class AsyncStream<T> {
     const self = await this.__focusOn()
     return self._next == null ? self : self._next
   }
+
+  /*::
+  @@asyncIterator(): AsyncIterator<T> {
+    throw new Error()
+  }*/
+
+  /**
+   * An iterator for the stream
+   */
+  // $FlowTodo: https://github.com/facebook/flow/issues/2286
+  async * [Symbol.asyncIterator] (): AsyncIterator<T> {
+    let self = this
+    while (true) {
+      const result = await self.current()
+      if (result.kind !== 'just') break
+      yield result.value
+      self = await self.shiftForward()
+    }
+  }
 }
 
 /**

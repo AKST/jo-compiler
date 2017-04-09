@@ -73,6 +73,25 @@ export class SyncStream<T> {
   shiftForward (): SyncStream<T> {
     throw new TypeError('abstract method')
   }
+
+  /*::
+  @@iterator(): Iterator<T> {
+    throw new Error()
+  }*/
+
+  /**
+   * An iterator for the stream
+   */
+  // $FlowTodo: https://github.com/facebook/flow/issues/2286
+  * [Symbol.iterator] (): Iterator<T> {
+    let self = this
+    while (! self.done) {
+      const result = self.current()
+      if (result.kind !== 'just') break
+      yield result.value
+      self = self.shiftForward()
+    }
+  }
 }
 
 

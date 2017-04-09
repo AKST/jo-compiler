@@ -1,5 +1,6 @@
 // @flow
 import { withIterable } from '@/data/stream-async'
+import { asyncIter as getAsyncIter } from '@/util/data'
 
 async function* asyncIter<T> (self: Iterable<T>): AsyncIterator<T> {
   for (const it of self) yield it
@@ -45,4 +46,14 @@ test('extend', async (): Test => {
   // moveforwared 1 characters
   cStream = await cStream.shiftForward()
   expect(await cStream.done).toBeTruthy()
+})
+
+test('async iterator', async (): Test => {
+  const sInput = asyncIter('abc')
+  const stream = withIterable(sInput)
+  const iter = getAsyncIter(stream)
+  expect((await iter.next()).value).toEqual('a')
+  expect((await iter.next()).value).toEqual('b')
+  expect((await iter.next()).value).toEqual('c')
+  expect((await iter.next()).value).toEqual(undefined)
 })
