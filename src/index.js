@@ -1,9 +1,8 @@
 import 'babel-polyfill'
 
-import io from '@/util/io'
-import { withIterable } from '@/data/stream'
+import { readStream } from '@/util/io'
 import getConfig from '@/init/args'
-import tokens from '@/pass/lexer'
+import { tokenStream } from '@/pass/lexer'
 
 (async function () {
   try {
@@ -12,11 +11,15 @@ import tokens from '@/pass/lexer'
     for (const fileName of config.files) {
       console.log(`Tokens for '${fileName}'`)
 
-      for await (const chunk of io.readStream(fileName)) {
-        for (const token of tokens(withIterable(chunk))) {
-          console.log(`  token: ${token.toString()}`)
-        }
+      for await (const token of tokenStream(readStream(fileName))) {
+        console.log(`  token: ${token.toString()}`)
       }
+
+      // for await (const chunk of io.readStream(fileName)) {
+      //   for (const token of tokens(withIterable(chunk))) {
+      //     console.log(`  token: ${token.toString()}`)
+      //   }
+      // }
     }
   }
   catch (error) {

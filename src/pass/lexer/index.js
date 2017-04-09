@@ -1,21 +1,53 @@
 // @flow
 import type { Stream } from '@/data/stream'
+import type Token from '@/data/lex-token'
 import type { StateProcess } from '@/pass/lexer/state'
 
+import { withIterable } from '@/data/stream'
+import * as tokens from '@/data/lex-token'
 import { init } from '@/util/data'
 import * as error from '@/pass/lexer/error'
 import State from '@/pass/lexer/state'
-import * as tokens from '@/data/lex-token'
+
+/**
+ * Makes a piece of state that can be consumed
+ * functions exported by this module.
+ */
+export function initialState (): State {
+  return State.create(withIterable(''), branchInit)
+}
 
 /**
  * Main entry point of the module, basically consumes the input from
- * the stream, until it reaches the end of the stream. If there's more
- * input just pass the state of the lexer back in and it will continue
- * lexing.
+ * the stream, until it reaches the end of the stream.
  *
- * @param stream - A stream of characters.
+ * @param input - A stream of strings.
+ */
+export function tokenStream (input: AsyncIterable<string>): AsyncIterable<Token> {
+  return asyncLoop(initialState(), input)
+}
+
+async function* asyncLoop (state: State, iterator: AsyncIterable<string>): AsyncIterable<Token> {
+  // $FlowTodo
+  const { done, value } = await iterator.next()
+
+  if (! done && value == null) {
+    throw new error.EmptyInputError()
+  }
+  else if (! done) {
+    const stream = withIterable(value)
+    // $FlowTodo
+    const update = yield * withState(state, stream)
+    yield * asyncLoop(update, iterator)
+  }
+}
+
+/**
+ * Takes a stream and feed additional input into it.
  *
- * @param state - An optional parameter for taking left over state
+ * @param state - A stream of characters.
+ *
+ * @param stream - An optional parameter for taking left over state
  * for additional input.
  *
  * @returns An iterator that will yields lexical tokens for the
@@ -23,10 +55,8 @@ import * as tokens from '@/data/lex-token'
  * the iterator, which can be passed back into this function for
  * additional input.
  */
-export default function (stream: Stream<string>, state: ?State): StateProcess {
-  return state == null
-    ? loop(State.create(stream, branchInit))
-    : loop(state)
+export function withState (state: State, stream: Stream<string>): StateProcess {
+  return loop(state.addInput(stream))
 }
 
 ///////////////////////////////////////////////////////////
