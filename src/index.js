@@ -11,6 +11,7 @@ import tokens from '@/pass/lexer'
 
     for (const fileName of config.files) {
       console.log(`Tokens for '${fileName}'`)
+
       const fileContents = await io.readFile(fileName, { encoding: 'utf8' })
       for (const token of tokens(withIterable(fileContents))) {
         console.log(`  token: ${token.toString()}`)
