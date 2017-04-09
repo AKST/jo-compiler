@@ -37,5 +37,6 @@ clean:
 	rm -rf node_modules
 	rm -rf dist
 	rm -rf docs
+	make init
 
 .PHONY: default watch ci init build clean docs type lint test
