@@ -6,7 +6,7 @@ import { withIterable as initSyncStream, T as SyncStream } from '@/data/stream-s
 import { withIterable as initAsyncStream, T as AsyncStream } from '@/data/stream-async'
 import * as tokens from '@/data/lex-token'
 import { init } from '@/util/data'
-import * as error from '@/pass/lexer/error'
+import * as error from '@/error/lexer'
 import State from '@/pass/lexer/state'
 
 /**

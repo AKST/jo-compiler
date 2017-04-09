@@ -1,17 +1,19 @@
 // @flow
-export default class TokenError extends Error {}
+import JoError from '@/error'
+
+export default class TokenError extends JoError {}
 
 export class UnexpectedChar extends TokenError {
   character: string;
 
   constructor (character: string) {
-    super(`Unexpected character '${character}`)
+    super(['lexer', 'unexpected-char'], `Unexpected character '${character}`)
     this.character = character
   }
 }
 
 export class EmptyInputError extends TokenError {
   constructor () {
-    super('input was unexpectedly null')
+    super(['lexer', 'empty-input'], 'input was unexpectedly null')
   }
 }

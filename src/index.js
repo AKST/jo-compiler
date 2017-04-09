@@ -3,14 +3,17 @@ import 'babel-polyfill'
 import getConfig from '@/init/args'
 import { readStream } from '@/util/io'
 import { tokenStream } from '@/pass/lexer'
+import { parseModule } from '@/pass/parse'
 
 const config = getConfig()
 
 config.files.forEach(async fileName => {
-  console.log(`Tokens for '${fileName}'`)
-
-  // emit all the lexical tokens from the stream
-  for await (const token of tokenStream(readStream(fileName))) {
-    console.log(`  token: ${token.toString()}`)
+  try {
+    const tokens = tokenStream(readStream(fileName))
+    const module = await parseModule(tokens)
+    console.log(module.toJSON(2))
+  }
+  catch (error) {
+    console.log(error.toJSON(true))
   }
 })
