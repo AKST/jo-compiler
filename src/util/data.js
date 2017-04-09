@@ -34,3 +34,14 @@ export function init<T> (Contructor: $FlowFixMe, ...args: Array<any>): T {
   const instance = new Contructor(...args)
   return Object.freeze(instance)
 }
+
+export function iter<T> (iterable: Iterable<T>): Iterator<T> {
+  // $FlowTodo: https://github.com/facebook/flow/issues/2286
+  return iterable[Symbol.iterator]()
+}
+
+export function asyncIter<T> (iterable: AsyncIterable<T>): AsyncIterator<T> {
+  // $FlowTodo: https://github.com/facebook/flow/issues/2286
+  return iterable[Symbol.asyncIterator]()
+}
+
