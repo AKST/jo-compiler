@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-import { Unimplemented } from '@/error'
+import { Unimplemented } from '@/data/error'
 import getConfig from '@/core/args'
 import debug from '@/core/debug'
 

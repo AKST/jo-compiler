@@ -1,9 +1,9 @@
 // @flow
 import type { T as Config, DebugMode } from '@/data/config'
-import type Token from '@/data/lex-token'
-import type Module from '@/data/syntax-ir'
+import type Token from '@/data/pass/lexer'
+import type Module from '@/data/pass/syntax'
 
-import { Unimplemented } from '@/error'
+import { Unimplemented } from '@/data/error'
 import { tokenStream } from '@/pass/lexer'
 import { parseModule } from '@/pass/parse'
 import { readStream } from '@/util/io'
