@@ -26,7 +26,10 @@ lint: node_modules
 
 docs: node_modules
 	./node_modules/.bin/documentation build \
-		src/** src/* -f html -o docs --document-exported
+		src/** src/* -f html -o docs \
+		--document-exported \
+		--infer-private \
+		--name jo-script
 
 watch:
 	@which watchman-make > /dev/null || ( echo 'install watchman' && exit 1 )
