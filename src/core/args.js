@@ -1,14 +1,56 @@
 // @flow
-import parseCLI from 'command-line-args'
+import { ArgumentParser } from 'argparse'
+import HelpAction from 'argparse/lib/action/help'
 import Config from '@/data/config'
 
-const cliConfig = [
-  { name: 'input', type: String, multiple: true, defaultOption: true },
-  { name: 'debug', type: String },
-]
+HelpAction.prototype.call = function () {}
+
+const parser = new ArgumentParser({
+  addHelp: true,
+  description: 'JoScipt JoLang: a bizarre language',
+})
+
+const commandParser = parser.addSubparsers({ title: 'command', dest: 'mode' })
+
+const buildParser = commandParser.addParser('build', {
+  addHelp: true,
+  description: 'build source code',
+})
+
+buildParser.addArgument('main', {
+  action: 'store',
+  nargs: '1',
+  append: true,
+  help: 'files being debugged'
+})
+
+const debugParser = commandParser.addParser('debug', {
+  addHelp: true,
+  description: 'For debugging compiler output',
+})
+
+debugParser.addArgument(['-p', '--pass'], {
+  action: 'store',
+  dest: 'mode',
+  help: 'The compiler pass being debugged'
+})
+
+debugParser.addArgument('input', {
+  action: 'store',
+  nargs: '*',
+  append: true,
+  help: 'files being debugged'
+})
+
+debugParser.addArgument(['-f', '--format'], {
+  action: 'store',
+  append: true,
+  help: 'files being debugged',
+  defaultValue: 'json',
+})
 
 export default function getConfig (): Config {
-  const { input: _input, debug } = parseCLI(cliConfig)
-  const input = _input || []
-  return Config.create({ debug, input })
+  const config = parser.parseArgs()
+  const descriptor = { debug: config.mode, input: config.input }
+  return Config.create(descriptor)
 }
