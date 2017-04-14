@@ -32,6 +32,7 @@
     "pre-commit": "^1.2.2"
   },
   "dependencies": {
+    "argus-pagus": "0.1.10",
     "command-line-args": "^4.0.2",
     "fs-promise": "^2.0.2",
     "stream-to-async-iterator": "^0.2.0"

@@ -14,6 +14,7 @@ flow-typed: node_modules
 
 build: node_modules
 	./node_modules/.bin/babel src --out-dir dist/src
+	cp ./package.json ./dist/.
 
 test: node_modules
 	./node_modules/.bin/jest

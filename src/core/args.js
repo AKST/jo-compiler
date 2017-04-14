@@ -1,11 +1,18 @@
 // @flow
-import { ArgumentParser } from 'argparse'
-import HelpAction from 'argparse/lib/action/help'
+import { version } from '@/../package.json'
+import { ArgumentParser } from 'argus-pagus'
+import HelpAction from 'argus-pagus/lib/action/help'
+import VersAction from 'argus-pagus/lib/action/version'
+import StoreAction from 'argus-pagus/lib/action/store'
 import Config from '@/data/config'
 
-HelpAction.prototype.call = function () {}
+// due to some bull shit with arg pass exiting
+// immediately, lets override that and just store it...
+HelpAction.prototype.call = StoreAction.prototype.call
+VersAction.prototype.call = StoreAction.prototype.call
 
 const parser = new ArgumentParser({
+  version,
   addHelp: true,
   description: 'JoScipt JoLang: a bizarre language',
 })

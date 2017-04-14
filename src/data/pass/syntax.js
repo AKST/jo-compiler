@@ -1,3 +1,9 @@
-export default class Module {
+export default class Syntax {
 
 }
+
+export class Module {
+
+}
+
+export { Syntax }
