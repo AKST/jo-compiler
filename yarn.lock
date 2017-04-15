@@ -111,9 +111,9 @@ argparse@^1.0.7:
   dependencies:
     sprintf-js "~1.0.2"
 
-argus-pagus@0.1.10:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/argus-pagus/-/argus-pagus-0.1.10.tgz#f80390ed8706b48c2a8f4e5ea9ce657c191c0be5"
+argus-pagus@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/argus-pagus/-/argus-pagus-0.2.1.tgz#c093183a85c0b15761d95979cfcb18a7366fa2a4"
   dependencies:
     sprintf-js "~1.0.2"
 

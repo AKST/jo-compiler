@@ -1,15 +1,7 @@
 // @flow
 import { version } from '@/../package.json'
-import { ArgumentParser } from 'argus-pagus'
-import HelpAction from 'argus-pagus/lib/action/help'
-import VersAction from 'argus-pagus/lib/action/version'
-import StoreAction from 'argus-pagus/lib/action/store'
+import ArgumentParser from 'argus-pagus'
 import Config from '@/data/config'
-
-// due to some bull shit with arg pass exiting
-// immediately, lets override that and just store it...
-HelpAction.prototype.call = StoreAction.prototype.call
-VersAction.prototype.call = StoreAction.prototype.call
 
 const parser = new ArgumentParser({
   version,
