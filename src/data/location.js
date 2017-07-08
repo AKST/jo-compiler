@@ -1,5 +1,7 @@
 // @flow
 import { init, set } from '@/util/data'
+import Comparison from '@/data/comparison'
+
 
 export class Position {
   line: number
@@ -20,6 +22,14 @@ export class Position {
       const column = this.column + 1
       return set(this, { column })
     }
+  }
+
+  compare (other: Position): Comparison {
+    if (this.line > other.line) return init(Comparison, this.line - other.line)
+    if (this.line < other.line) return init(Comparison, other.line - this.line)
+    if (this.column > other.column) return init(Comparison, this.column - other.column)
+    if (other.column > this.column) return init(Comparison, other.column - this.column)
+    return init(Comparison, 0)
   }
 
   static init (): Position {

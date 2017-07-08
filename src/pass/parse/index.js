@@ -1,78 +1,40 @@
 // @flow
 
+import * as parseErrors from '@/data/error/parse'
 import { T as AsyncStream, withIterable } from '@/data/stream-async'
 import { Unimplemented } from '@/data/error'
-import * as parseError from '@/data/error/parse'
-import Syntax, * as syn from '@/data/pass/syntax'
+import Syntax from '@/data/pass/syntax'
 import Lexicon, * as lex from '@/data/pass/lexer'
 
-type Input = AsyncStream<Lexicon>
+import type { ReadUpdate, Reader } from './-util'
+import State from './-state'
+import { choiceOf } from './-util'
 
-export function syntaxStream (tokens: Input): AsyncStream<syn.Syntax> {
-  return withIterable(streamSyntax(tokens))
+
+export function syntaxStream (tokens: AsyncStream<Lexicon>): AsyncStream<Syntax> {
+  return withIterable(streamSyntax(State.create(tokens)))
 }
 
-async function* streamSyntax (tokens: Input): AsyncIterator<syn.Syntax> {
-  const read = await nextExpression(tokens)
-  if (read.kind === 'done') return
-  if (read.kind === 'some') {
-    yield read.value
-    return yield * streamSyntax(read.rest)
-  }
-  if (read.kind === 'unacceptable') {
-    throw new parseError.UnexpectedLexicon(read.encounted)
-  }
+async function* streamSyntax (state: State): AsyncIterator<Syntax> {
+  if (await state.isEmpty()) return
+  const { value: expresssion, update } = await nextExpression(state)
+  yield expresssion
+  yield * streamSyntax(update)
 }
-
-
-type ReadUpdate =
-  | { kind: 'more', rest: Input, value: Syntax }
-  | { kind: 'done' }
-  | { kind: 'unacceptable', encounted: Array<Lexicon> }
-
-type Reader = (tokens: Input) => Promise<ReadUpdate>
 
 const nextExpression: Reader = choiceOf(
   nextCompoundExpression,
 )
 
-
-async function nextCompoundExpression (tokens: Input): Promise<ReadUpdate> {
-  const result = await tokens.current()
-  if (result.kind === 'just') {
-    const current = result.value
-    if (! (current instanceof lex.LParenLexicon)) return unacceptable(current)
-    throw new Unimplemented('nextCompoundExpression')
+async function nextCompoundExpression (state: State): Promise<ReadUpdate<Syntax>> {
+  const currentLexicon = await state.current
+  if (! (currentLexicon instanceof lex.LParenLexicon)) {
+    throw state.createError(parseErrors.UnexpectedLexicon,
+      currentLexicon,
+      lex.LParenLexicon,
+    )
   }
-  else {
-    return { kind: 'done' }
-  }
+
+  let stateUpdate = state.shiftForward()
+  throw new Unimplemented('nextCompoundExpression')
 }
-
-
-function choiceOf (...choices: Array<Reader>): Reader {
-  return async function (tokens: Input) {
-    const notAccepted = []
-    for (const choice of choices) {
-      const result = await choice(tokens)
-      if (result.kind === 'done') return result
-
-      if (result.kind === 'unacceptable') {
-        const rUnaccepted = result.encounted
-        while (rUnaccepted.length) notAccepted.push(rUnaccepted.pop())
-        continue
-      }
-
-      if (result.kind === 'more') {
-        return result
-      }
-    }
-    return { kind: 'unacceptable', encounted: notAccepted }
-  }
-}
-
-
-function unacceptable (token: Lexicon): ReadUpdate {
-  return { kind: 'unacceptable', encounted: [token] }
-}
-

@@ -1,15 +1,14 @@
 // @flow
-import { T as AsyncStream } from '@/data/stream-async'
-
 export class Syntax {
 
 }
 
-export class Module {
-  _topLevelSyntax: AsyncStream<Syntax>
+export class CompoundExpression extends Syntax {
+  items: Array<Syntax>
 
-  constructor (topLevelSyntax: AsyncStream<Syntax>) {
-    this._topLevelSyntax = topLevelSyntax
+  constructor (items: Array<Syntax>) {
+    super()
+    this.items = items
   }
 }
 
