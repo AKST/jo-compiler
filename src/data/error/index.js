@@ -1,4 +1,5 @@
 // @flow
+import { getStack } from './-util'
 
 type JSONShape = {
   meta: { code: Array<string>, message: string },
@@ -6,12 +7,26 @@ type JSONShape = {
 }
 
 export default class JoError {
+  /**
+   * Think of code as meta data tags associted with the
+   * reason for the code failing.
+   */
   code: Array<string>
+
+  /**
+   * Stack trace
+   */
+  stack: Array<string>
+
+  /**
+   * Friendly error message intended for project maintainer
+   */
   message: string
 
   constructor (code: Array<string>, message: string) {
     this.message = message
     this.code = code
+    this.stack = getStack(4)
   }
 
   /**
@@ -28,6 +43,13 @@ export default class JoError {
     }
 
     return shape
+  }
+
+  toString () {
+    const message = `message:\n  - ${this.message}`
+    const stackTrace = `stack:\n${this.stack.join('\n')}`;
+    const metaData = `tags:${this.code.map(it => `\n  - ${it}`).join('')}`
+    return `${metaData}\n${message}\n${stackTrace}`
   }
 }
 
