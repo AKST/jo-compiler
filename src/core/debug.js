@@ -1,5 +1,8 @@
 // @flow
-import type { T as Config, DebugMode } from '@/data/config'
+import type {
+  ConfigDebugBuild,
+  DebugMode,
+} from '@/data/config'
 import type Token from '@/data/pass/lexer'
 import type Syntax from '@/data/pass/syntax'
 
@@ -19,10 +22,10 @@ function getPass (name: DebugMode): Pass {
   }
 }
 
-export default async function (mode: DebugMode, config: Config): Promise<Object> {
-  const pass = getPass(mode)
-  const result = { pass: mode, files: [] }
-  for (const filename of config.files) {
+export default async function (config: ConfigDebugBuild): Promise<Object> {
+  const pass = getPass(config.debug)
+  const result = { pass: config.debug, files: [] }
+  for (const filename of config.input) {
     result.files.push(await pass(filename))
   }
   return result

@@ -40,8 +40,8 @@ async function parseCompoundExpression (initialState: State): Promise<ReadUpdate
   }
 
   // we need to forget the opening paren
-  stateUpdate = await stateUpdate.shiftForward()
   const startPos = stateUpdate.position
+  stateUpdate = await stateUpdate.shiftForward()
   const subExpressions: Array<Syntax> = []
 
   while (true) {

@@ -1,12 +1,13 @@
 // @flow
-import { init } from '@/util/data'
+export type ConfigDebugBuild
+  = { mode: 'debug:build', input: Array<string>, debug: DebugMode }
 
-type Files = Array<string>
+export type ConfigDebugRepl
+  = { mode: 'debug:repl', debug: DebugMode }
 
-export type ConfigDescriptor = {
-  input: Array<string>,
-  debug: ?string
-}
+export type ConfigDescriptor
+  = ConfigDebugBuild
+  | ConfigDebugRepl
 
 export type DebugMode = 'lexer' | 'parse'
 
@@ -18,34 +19,19 @@ function validDebugMode (mode: ?string): ?DebugMode {
 }
 
 /**
- * Configuration state
+ * Sanitizes the configuration options.
+ *
+ * @param config - The config object being sanitized.
  */
-export class Config {
-  _files: Files
-  _debugMode: ?DebugMode
-
-  constructor (files: Files, debugMode: ?DebugMode) {
-    this._files = files
-    this._debugMode = debugMode
+export function createConfig (config: ConfigDescriptor): ConfigDescriptor {
+  if (['debug:build', 'debug:repl'].includes(config.mode)) {
+    if (config.debug == null) throw new TypeError('unspecified mode')
+    validDebugMode(config.debug)
   }
-
-  get debugMode (): ?DebugMode {
-    return this._debugMode
-  }
-
-  get files (): Files {
-    return [...this._files]
-  }
-
-  static create (config: ConfigDescriptor): Config {
-    const mode = validDebugMode(config.debug)
-    return init(Config, config.input, mode)
-  }
+  return Object.freeze(config)
 }
 
 /**
  * @access private
  */
-export const T = Config
-
-export default Config
+export type T = ConfigDescriptor

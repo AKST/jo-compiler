@@ -1,7 +1,9 @@
 // @flow
 import { version } from '@/../package.json'
 import ArgumentParser from 'argus-pagus'
-import Config from '@/data/config'
+
+import { createConfig } from '@/data/config'
+import type { ConfigDescriptor } from '@/data/config'
 
 const parser = new ArgumentParser({
   version,
@@ -23,14 +25,33 @@ buildParser.addArgument('main', {
   help: 'files being debugged'
 })
 
-const debugParser = commandParser.addParser('debug', {
+
+const debugReplParser = commandParser.addParser('debug:repl', {
+  addHelp: true,
+  description: 'For debugging compiler output',
+})
+
+debugReplParser.addArgument(['-p', '--pass'], {
+  action: 'store',
+  dest: 'pass',
+  help: 'The compiler pass being debugged'
+})
+
+debugReplParser.addArgument(['-f', '--format'], {
+  action: 'store',
+  append: true,
+  help: 'files being debugged',
+  defaultValue: 'json',
+})
+
+const debugParser = commandParser.addParser('debug:build', {
   addHelp: true,
   description: 'For debugging compiler output',
 })
 
 debugParser.addArgument(['-p', '--pass'], {
   action: 'store',
-  dest: 'mode',
+  dest: 'pass',
   help: 'The compiler pass being debugged'
 })
 
@@ -48,8 +69,22 @@ debugParser.addArgument(['-f', '--format'], {
   defaultValue: 'json',
 })
 
-export default function getConfig (): Config {
+export default function getConfig (): ConfigDescriptor {
   const config = parser.parseArgs()
-  const descriptor = { debug: config.mode, input: config.input }
-  return Config.create(descriptor)
+
+  switch (config.mode) {
+    case 'debug:repl':
+      return createConfig({
+        mode: 'debug:repl',
+        debug: config.pass,
+      })
+    case 'debug:build':
+      return createConfig({
+        mode: 'debug:build',
+        debug: config.pass,
+        input: config.input,
+      })
+    default:
+      throw new TypeError('unknown mode')
+  }
 }
