@@ -1,10 +1,10 @@
 // @flow
 
-// import * as parseErrors from '@/data/error/parse'
 import { T as AsyncStream, withIterable } from '@/data/stream-async'
-import { Unimplemented } from '@/data/error'
 import Syntax, * as syn from '@/data/pass/syntax'
 import Lexicon, * as lex from '@/data/pass/lexer'
+import Location from '@/data/location'
+import { init } from '@/util/data'
 
 import type { ReadUpdate, Reader } from './-util'
 import State from './-state'
@@ -32,8 +32,8 @@ const parseExpression: Reader = choiceOf(
   parseCompoundExpression,
 )
 
-async function parseCompoundExpression (state: State): Promise<ReadUpdate<Syntax>> {
-  let { update: stateUpdate } = await skipWhiteSpace(state)
+async function parseCompoundExpression (initialState: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(initialState)
   const currentLexicon = await stateUpdate.current
   if (! (currentLexicon instanceof lex.LParenLexicon)) {
     throw unexpectedLexicon.call(stateUpdate, currentLexicon, lex.LParenLexicon)
@@ -41,23 +41,29 @@ async function parseCompoundExpression (state: State): Promise<ReadUpdate<Syntax
 
   // we need to forget the opening paren
   stateUpdate = await stateUpdate.shiftForward()
+  const startPos = stateUpdate.position
   const subExpressions: Array<Syntax> = []
 
   while (true) {
+    // storing the shifted state
     stateUpdate = (await skipWhiteSpace(stateUpdate)).update
     const token = await stateUpdate.current
 
-    if (token.value instanceof lex.RParenLexicon) break
+    if (token instanceof lex.RParenLexicon) break
     let result = await parseExpression(stateUpdate)
     stateUpdate = result.update
     subExpressions.push(result.value)
   }
 
-  throw new Unimplemented('nextCompoundExpression')
+  // making sure not to forget the drop the closing paren
+  const update = await stateUpdate.shiftForward()
+  const location = init(Location, startPos, update.position)
+  const value = init(syn.CompoundSyntax, location, subExpressions)
+  return { update, value }
 }
 
-async function parseIdentifier (state: State): Promise<ReadUpdate<Syntax>> {
-  let { update: stateUpdate } = await skipWhiteSpace(state)
+async function parseIdentifier (initialState: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(initialState)
   const token = await stateUpdate.current
 
   if (! (token instanceof lex.IdentifierLexicon)) {
@@ -67,12 +73,12 @@ async function parseIdentifier (state: State): Promise<ReadUpdate<Syntax>> {
   return {
     // make sure if forgets about this token
     update: await stateUpdate.shiftForward(),
-    value: new syn.IdentiferSyntax(token.identifier),
+    value: init(syn.IdentiferSyntax, token.location, token.identifier),
   }
 }
 
-async function parseString (state: State): Promise<ReadUpdate<Syntax>> {
-  let { update: stateUpdate } = await skipWhiteSpace(state)
+async function parseString (initialState: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(initialState)
   const token = await stateUpdate.current
 
   if (! (token instanceof lex.StringLexicon)) {
@@ -82,6 +88,6 @@ async function parseString (state: State): Promise<ReadUpdate<Syntax>> {
   return {
     // make sure if forgets about this token
     update: await stateUpdate.shiftForward(),
-    value: new syn.StringSyntax(token.contents),
+    value: init(syn.StringSyntax, token.location, token.contents),
   }
 }

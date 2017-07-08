@@ -25,10 +25,12 @@ export class Position {
   }
 
   compare (other: Position): Comparison {
-    if (this.line > other.line) return init(Comparison, this.line - other.line)
-    if (this.line < other.line) return init(Comparison, other.line - this.line)
-    if (this.column > other.column) return init(Comparison, this.column - other.column)
-    if (other.column > this.column) return init(Comparison, other.column - this.column)
+    const lineDiff = this.line - other.line
+    const colDiff = this.column - other.column
+    if (this.line > other.line) return init(Comparison, lineDiff)
+    if (this.line < other.line) return init(Comparison, lineDiff)
+    if (this.column > other.column) return init(Comparison, colDiff)
+    if (other.column > this.column) return init(Comparison, colDiff)
     return init(Comparison, 0)
   }
 

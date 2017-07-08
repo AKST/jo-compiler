@@ -9,11 +9,9 @@ type LexiconJSON = { type: string, location: Location, repr?: Object }
  */
 export default class Lexicon {
   location: Location
-  kind: string
 
-  constructor (location: Location, kind: string) {
+  constructor (location: Location) {
     this.location = location
-    this.kind = kind
   }
 
   @notImplemented('required in sub type')
@@ -35,15 +33,19 @@ export default class Lexicon {
   toString (): string {
     throw new TypeError('abstract method')
   }
+
+  get kind (): string {
+    // $FlowTodo, this can be ignored
+    const type: string = this.constructor.kind
+    return type
+  }
 }
 
 /**
  * Lexical token that represent an opening paren
  */
 export class LParenLexicon extends Lexicon {
-  constructor (location: Location) {
-    super(location, 'left-paren')
-  }
+  static kind: string = 'left-paren'
 
   get __repr (): ?Object {
     return null
@@ -58,9 +60,7 @@ export class LParenLexicon extends Lexicon {
  * Lexical token that represent an closing paren
  */
 export class RParenLexicon extends Lexicon {
-  constructor (location: Location) {
-    super(location, 'right-paren')
-  }
+  static kind: string = 'right-paren'
 
   get __repr (): ?Object {
     return null
@@ -75,10 +75,11 @@ export class RParenLexicon extends Lexicon {
  * Lexical token that represents an identifier
  */
 export class IdentifierLexicon extends Lexicon {
+  static kind: string = 'identifier'
   identifier: string
 
   constructor (identifier: string, location: Location) {
-    super(location, 'identifier')
+    super(location)
     this.identifier = identifier
   }
 
@@ -95,10 +96,11 @@ export class IdentifierLexicon extends Lexicon {
  * Lexical token that represents a normal string
  */
 export class StringLexicon extends Lexicon {
+  static kind: string = 'string'
   contents: string
 
   constructor (contents: string, location: Location) {
-    super(location, 'string')
+    super(location)
     this.contents = contents
   }
 
@@ -115,10 +117,11 @@ export class StringLexicon extends Lexicon {
  * Lexical token that represents whitespace
  */
 export class WhiteSpaceLexicon extends Lexicon {
+  static kind: string = 'whitespace'
   length: number
 
   constructor (length: number, location: Location) {
-    super(location, 'whitespace')
+    super(location)
     this.length = length
   }
 
