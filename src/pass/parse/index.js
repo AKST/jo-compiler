@@ -1,14 +1,18 @@
 // @flow
 
-import * as parseErrors from '@/data/error/parse'
+// import * as parseErrors from '@/data/error/parse'
 import { T as AsyncStream, withIterable } from '@/data/stream-async'
 import { Unimplemented } from '@/data/error'
-import Syntax from '@/data/pass/syntax'
+import Syntax, * as syn from '@/data/pass/syntax'
 import Lexicon, * as lex from '@/data/pass/lexer'
 
 import type { ReadUpdate, Reader } from './-util'
 import State from './-state'
-import { choiceOf } from './-util'
+import {
+  choiceOf,
+  skipWhiteSpace,
+  unexpectedLexicon,
+} from './-util'
 
 
 export function syntaxStream (tokens: AsyncStream<Lexicon>): AsyncStream<Syntax> {
@@ -17,24 +21,67 @@ export function syntaxStream (tokens: AsyncStream<Lexicon>): AsyncStream<Syntax>
 
 async function* streamSyntax (state: State): AsyncIterator<Syntax> {
   if (await state.isEmpty()) return
-  const { value: expresssion, update } = await nextExpression(state)
+  const { value: expresssion, update } = await parseExpression(state)
   yield expresssion
   yield * streamSyntax(update)
 }
 
-const nextExpression: Reader = choiceOf(
-  nextCompoundExpression,
+const parseExpression: Reader = choiceOf(
+  parseIdentifier,
+  parseString,
+  parseCompoundExpression,
 )
 
-async function nextCompoundExpression (state: State): Promise<ReadUpdate<Syntax>> {
-  const currentLexicon = await state.current
+async function parseCompoundExpression (state: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(state)
+  const currentLexicon = await stateUpdate.current
   if (! (currentLexicon instanceof lex.LParenLexicon)) {
-    throw state.createError(parseErrors.UnexpectedLexicon,
-      currentLexicon,
-      lex.LParenLexicon,
-    )
+    throw unexpectedLexicon.call(stateUpdate, currentLexicon, lex.LParenLexicon)
   }
 
-  let stateUpdate = state.shiftForward()
+  // we need to forget the opening paren
+  stateUpdate = await stateUpdate.shiftForward()
+  const subExpressions: Array<Syntax> = []
+
+  while (true) {
+    stateUpdate = (await skipWhiteSpace(stateUpdate)).update
+    const token = await stateUpdate.current
+
+    if (token.value instanceof lex.RParenLexicon) break
+    let result = await parseExpression(stateUpdate)
+    stateUpdate = result.update
+    subExpressions.push(result.value)
+  }
+
   throw new Unimplemented('nextCompoundExpression')
+}
+
+async function parseIdentifier (state: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(state)
+  const token = await stateUpdate.current
+
+  if (! (token instanceof lex.IdentifierLexicon)) {
+    throw unexpectedLexicon.call(stateUpdate, token, lex.IdentifierLexicon)
+  }
+
+  return {
+    // make sure if forgets about this token
+    update: await stateUpdate.shiftForward(),
+    value: new syn.IdentiferSyntax(token.identifier),
+  }
+}
+
+async function parseString (state: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(state)
+  const token = await stateUpdate.current
+
+  if (! (token instanceof lex.StringLexicon)) {
+    throw unexpectedLexicon.call(stateUpdate, token, lex.IdentifierLexicon)
+  }
+
+  return {
+    // make sure if forgets about this token
+    update: await stateUpdate.shiftForward(),
+    value: new syn.StringSyntax(token.contents),
+  }
 }

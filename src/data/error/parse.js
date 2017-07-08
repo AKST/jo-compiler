@@ -44,10 +44,10 @@ export default class SyntaxError extends JoError {
 
 export class UnexpectedLexicon extends SyntaxError {
   encounted: Lexicon
-  expected: ?Class<Lexicon>
+  expected: Class<Lexicon>
 
-  constructor (encounted: Lexicon, expected: ?Class<Lexicon>) {
-    super('encounted unexpcted tokens')
+  constructor (encounted: Lexicon, expected: Class<Lexicon>) {
+    super(`Encounted '${encounted.kind}', expected ${expected.name}`)
     this.encounted = encounted
     this.expected = expected
   }

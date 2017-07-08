@@ -38,27 +38,21 @@ export function choiceOf (...choices: Array<Reader>): Reader {
 
 
 /**
- * @param afterWhitespace - A syntax parser that will run after whitespace is gone.
+ * @param state - The state for this parsing utility.
  */
-export function skipWhiteSpace <T> (afterWhitespace: Parser<T>): Parser<T> {
-  return async function (state: State): Promise<ReadUpdate<T>> {
-    let updatedState = state
+export async function skipWhiteSpace (state: State): Promise<ReadUpdate<void>> {
+  let updatedState = state
 
-    while (true) {
-      const currentLexicon = await updatedState.current
-      if (! (currentLexicon instanceof lex.WhiteSpaceLexicon)) break
-      updatedState = await updatedState.shiftForward()
-    }
-
-    return afterWhitespace(updatedState)
+  while (true) {
+    const currentLexicon = await updatedState.current
+    if (! (currentLexicon instanceof lex.WhiteSpaceLexicon)) break
+    updatedState = await updatedState.shiftForward()
   }
+
+  return { value: undefined, update: updatedState }
 }
 
-export function unexpectedFinish (state: State): ParseError {
-  return state.createError(parseErrors.UnexpectedFinish)
-}
-
-export function unacceptable (state: State, lexicon: Lexicon): ParseError {
-  return state.createError(parseErrors.UnexpectedLexicon, lexicon)
+export function unexpectedLexicon (lexicon: Lexicon, expected: Class<Lexicon>): ParseError {
+  return this.createError(parseErrors.UnexpectedLexicon, lexicon, expected)
 }
 
