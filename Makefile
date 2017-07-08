@@ -15,6 +15,10 @@ flow-typed: node_modules
 build: node_modules
 	./node_modules/.bin/babel src --out-dir dist/src
 	cp ./package.json ./dist/.
+	@for bin_file in ./dist/src/bin/*.js; do \
+		echo "#!$$(which env) node\n$$(cat $$bin_file)" > $$bin_file; \
+		chmod +x $$bin_file; \
+	done
 
 test: node_modules
 	./node_modules/.bin/jest

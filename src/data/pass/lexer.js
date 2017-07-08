@@ -1,5 +1,8 @@
 // @flow
 import type Location from '@/data/location'
+import { notImplemented } from '@/util/debug'
+
+type LexiconJSON = { type: string, location: Location, repr?: Object }
 
 /**
  * Base class for lexical tokens
@@ -11,6 +14,22 @@ export default class Lexicon {
   constructor (location: Location, kind: string) {
     this.location = location
     this.kind = kind
+  }
+
+  @notImplemented('required in sub type')
+  get __repr (): ?Object {
+    throw new TypeError()
+  }
+
+  toJSON (): LexiconJSON {
+    const base: LexiconJSON = { type: this.kind, location: this.location }
+    const repr = this.__repr
+
+    if (repr != null) {
+      base.repr = repr
+    }
+
+    return base
   }
 
   toString (): string {
@@ -26,6 +45,10 @@ export class LParenLexicon extends Lexicon {
     super(location, 'left-paren')
   }
 
+  get __repr (): ?Object {
+    return null
+  }
+
   toString (): string {
     return `LParenLexicon {}`
   }
@@ -37,6 +60,10 @@ export class LParenLexicon extends Lexicon {
 export class RParenLexicon extends Lexicon {
   constructor (location: Location) {
     super(location, 'right-paren')
+  }
+
+  get __repr (): ?Object {
+    return null
   }
 
   toString (): string {
@@ -55,6 +82,10 @@ export class IdentifierLexicon extends Lexicon {
     this.identifier = identifier
   }
 
+  get __repr (): Object {
+    return { name: this.identifier }
+  }
+
   toString (): string {
     return `IdentifierLexicon { identifier: '${this.identifier}' }`
   }
@@ -71,6 +102,10 @@ export class StringLexicon extends Lexicon {
     this.contents = contents
   }
 
+  get __repr (): Object {
+    return { body: this.contents }
+  }
+
   toString (): string {
     return `StringLexicon { content: '${this.contents}' }`
   }
@@ -85,6 +120,10 @@ export class WhiteSpaceLexicon extends Lexicon {
   constructor (length: number, location: Location) {
     super(location, 'whitespace')
     this.length = length
+  }
+
+  get __repr (): Object {
+    return { size: this.length }
   }
 
   toString (): string {

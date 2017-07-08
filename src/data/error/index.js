@@ -47,7 +47,7 @@ export default class JoError {
 
   toString () {
     const message = `message:\n  - ${this.message}`
-    const stackTrace = `stack:\n${this.stack.join('\n')}`;
+    const stackTrace = `stack:\n${this.stack.join('\n')}`
     const metaData = `tags:${this.code.map(it => `\n  - ${it}`).join('')}`
     return `${metaData}\n${message}\n${stackTrace}`
   }

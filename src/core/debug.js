@@ -1,11 +1,11 @@
 // @flow
 import type { T as Config, DebugMode } from '@/data/config'
 import type Token from '@/data/pass/lexer'
-import type Module from '@/data/pass/syntax'
+import type Syntax from '@/data/pass/syntax'
 
 import { Unimplemented } from '@/data/error'
 import { tokenStream } from '@/pass/lexer'
-import { parseModule } from '@/pass/parse'
+import { syntaxStream } from '@/pass/parse'
 import { readStream } from '@/util/io'
 
 type Pass = (fileName: string) => Promise<Result<any>>
@@ -38,9 +38,12 @@ async function lexerPass (filename: string): Promise<Result<Array<Token>>> {
   return result
 }
 
-async function parsePass (filename: string): Promise<Result<Module>> {
+async function parsePass (filename: string): Promise<Result<Array<Syntax>>> {
+  const result = { filename, data: [] }
   const tokens = tokenStream(readStream(filename))
-  const module = await parseModule(tokens)
-  return { filename, data: module }
+  for await (const syntax of syntaxStream(tokens)) {
+    result.data.push(syntax)
+  }
+  return result
 }
 

@@ -9,6 +9,7 @@ test/*.js
 [libs]
 
 [options]
+esproposal.decorators=ignore
 suppress_type=$FlowFixMe
 suppress_comment= \\(.\\|\n\\)*\\$FlowTodo
 unsafe.enable_getters_and_setters=true

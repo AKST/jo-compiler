@@ -1,6 +1,12 @@
 {
-  "presets": ["env", "stage-1"],
+  "presets": [["env", {
+    "targets": {
+      "node": "current"
+    }
+  }], "stage-1"],
   "plugins": [
+    "transform-function-bind",
+    "transform-decorators-legacy",
     ["babel-plugin-root-import", {
       "rootPathPrefix": "@",
       "rootPathSuffix": "src"
