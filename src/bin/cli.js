@@ -10,14 +10,13 @@ import debug from '@/core/debug'
 export async function main (): Promise<number> {
   const config: ConfigDescriptor = getConfig()
 
-
   if (config.mode === 'debug:build') {
     const result = await debug(config)
     console.log(JSON.stringify(result, null, 1))
     return 0
   }
   else {
-    throw new Unimplemented(`cli mode for '${config.mode}'`)
+    throw new Unimplemented(`CLI mode for '${config.mode}' is not implemented`)
   }
 }
 

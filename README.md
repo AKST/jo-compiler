@@ -2,17 +2,22 @@
 
 ## About
 
-Originally I was writing a compiler using Haskell to make a
-language called Jo, but I found writing it in Haskell had a
-bit of overhead so I've sided to write it in Javascript. As
-a person who very familar with JS, I figured it would be
-simpiler to write this initially in JS. As it would be faster
-for prototyping features, etc.
+I plan on writting is a language called Jo, I'm writting it in Javascript
+just to get an MVP off the ground. I'll likely rewrite it once I finish the
+design.
+
+### History
+
+Originally I was writing a compiler using OCaml, then I got sick of not
+having type classes, so then i moved it to Haskell but then I remembered
+how much strings piss me off in Haskell. So then moved this to Javascript
+because I know I get this finished alot faster in Javascript.
 
 ### Super Vague Road map
 
 1. Make the MVP, a lisp that defines the semantics of the language,
-   that generates executable compiler output, as well as a repl.
+   that generates executable compiler output, as well as a repl,
+   all in a lisp like syntax.
 2. Move to less lisp like syntax that easier on the eyes
 3. Make the language self hosted?
 4. Make compiler times faster?
