@@ -1,22 +1,32 @@
 // @flow
 import 'babel-polyfill'
 import { Unimplemented } from '@/data/error'
-
 import type { ConfigDescriptor } from '@/data/config'
+
 import getConfig from '@/core/args'
-import debug from '@/core/debug'
+import { withFiles as debugFiles, withRepl as debugRepl } from '@/core/debug'
+
+import {
+  stdin as inputStream,
+  stdout as outputConsumer,
+} from '@/util/io'
 
 
 export async function main (): Promise<number> {
   const config: ConfigDescriptor = getConfig()
 
-  if (config.mode === 'debug:build') {
-    const result = await debug(config)
-    console.log(JSON.stringify(result, null, 1))
-    return 0
-  }
-  else {
-    throw new Unimplemented(`CLI mode for '${config.mode}' is not implemented`)
+  switch (config.mode) {
+    case 'debug:build': {
+      const result = await debugFiles(config)
+      console.log(JSON.stringify(result, null, 1))
+      return 0
+    }
+    case 'debug:repl':
+      await debugRepl(config, inputStream(), outputConsumer())
+      return 0
+    default: {
+      throw new Unimplemented(`CLI mode for '${config.mode}' is not implemented`)
+    }
   }
 }
 

@@ -9,6 +9,8 @@ import { init } from '@/util/data'
 import * as error from '@/data/error/lexer'
 import State from '@/pass/lexer/state'
 
+export type { State, Token as Data }
+
 /**
  * Makes a piece of state that can be consumed
  * functions exported by this module.
@@ -26,10 +28,18 @@ export function initialState (): State {
  * @returns An immutable async stream of Tokens.
  */
 export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
-  return initAsyncStream(asyncLoop(initialState(), input))
+  return initAsyncStream(asyncStateMachine(initialState(), input))
 }
 
-async function* asyncLoop (state: State, iterator: AsyncIterable<string>): AsyncIterable<Token> {
+/**
+ * This can be paused and resumed, to continue pause and
+ * resume the process of lexing.
+ *
+ * @access private
+ * @param state - The lexer state.
+ * @param iterator - An iterator for the state of the lexer.
+ */
+async function* asyncStateMachine (state: State, iterator: AsyncIterable<string>): AsyncIterable<Token> {
   // $FlowTodo
   const { done, value } = await iterator.next()
 
@@ -40,7 +50,7 @@ async function* asyncLoop (state: State, iterator: AsyncIterable<string>): Async
     const stream = initSyncStream(value)
     // $FlowTodo
     const update = yield * withState(state, stream)
-    yield * asyncLoop(update, iterator)
+    yield * asyncStateMachine(update, iterator)
   }
 }
 
