@@ -3,6 +3,7 @@
 import type { ConfigDebugRepl, ReplInterface, DebugMode } from '~/data/config'
 import type { InputProducer, OutputConsumer } from '~/util/io'
 
+import { Unimplemented } from '~/data/error'
 import { defaultReplInterface } from '~/data/config'
 import { takeWhile, join } from '~/util/array'
 
@@ -33,43 +34,66 @@ export async function withRepl (
 
 /////////////////////////////////////////////////////////
 
-type ReplyChunkContinue<O> = { state: 'cont', value: O }
-type ReplyChunkSuspended<S> = { state: 'suspend', return: S }
+type ReplyChunkContinue<O> = { type: 'data', value: O }
+type ReplyChunkSuspended<S> = { type: 'suspend', state: S }
 
-type Pipe<I, O, S> = {
+interface Pipe<I, O, S> {
   push (input: I): PipeReply<O, S>,
-  pushWith (input: I, state: O): PipeReply<O, S>
+  pushWith (input: I, state: O): PipeReply<O, S>,
 }
 
-type PipeReply<O, S> = {
-  pullChunk (): Promise<ReplyChunk<O, S>>
+interface PipeReply<O, S> {
+  pullChunk (): Promise<ReplyChunk<O, S>>,
 }
 
 type ReplyChunk<O, S> = ReplyChunkContinue<O>
                       | ReplyChunkSuspended<S>
 
-function getPipe (mode: DebugMode): Pipe<string, any, any> {
-  const dumbyReply = {
-    pullChunk () {
-      return Promise.resolve({ state: 'suspend', return: null })
-    },
+async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterface, out: OutputConsumer): Promise<S> {
+  loop: while (true) {
+    const update = await reply.pullChunk()
+    switch (update.type) {
+      case 'data': {
+        const asJson = JSON.stringify(update.value, null, 2)
+        out.push(formatOutput(cli, asJson))
+        continue loop;
+      }
+      case 'suspend': {
+        return update.state
+      }
+    }
   }
+  throw new Unimplemented('unreachable');
+}
+
+/////////////////////////////////////////////////////////
+
+function getPipe (mode: DebugMode): Pipe<string, any, any> {
+  type DumbReply = { state: number } & PipeReply<any, any>
+  const dumbyReply = (): DumbReply => ({
+    state: 0,
+
+    pullChunk () {
+      this.state++
+      return this.state > 3
+        ? Promise.resolve({ type: 'suspend', state: null })
+        : Promise.resolve({ type: 'data', value: null })
+    },
+  })
 
   const dumbyPipe = {
     pushWith (s: string, ss: any) {
-      return dumbyReply
+      return dumbyReply()
     },
     push (s: string) {
-      return dumbyReply
+      return dumbyReply()
     },
   }
 
   return dumbyPipe
 }
 
-async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterface, out, OutputConsumer): Promise<S> {
-  return ({}: any)
-}
+
 
 /////////////////////////////////////////////////////////
 
