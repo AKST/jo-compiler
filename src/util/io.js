@@ -3,7 +3,13 @@ import fs from 'fs'
 import fsPromise from 'fs-promise'
 import S2A from 'stream-to-async-iterator'
 
+import Consumer, { consumerFromStream } from '@/data/reactive/consumer'
+
 export type StrIOIter = AsyncIterator<string>
+
+export type InputObservable = {}
+
+export type OutputConsumer = Consumer<string>
 
 export const readFile = fsPromise.readFile
 
@@ -25,25 +31,16 @@ export async function* stdin (): StrIOIter {
   }
 }
 
-export async function* stdout (): AsyncGenerator<void, void, string> {
-  const write = process.stdout.write.bind(process.stdout)
-  while (true) {
-    const output: string = yield
-    await nodeCallbackAsPromise(write, output, 'utf8')
-  }
+/**
+ * Output consumer for stdout.
+ */
+export function stdout (): Consumer<string> {
+  return consumerFromStream(process.stdout)
 }
 
 /**
- * Turns a node callback into a promise.
- *
- * @access private
- * @param fn - The function.
- * @param initialArgs - The arguments before the callback.
+ * Output consumer for stdout.
  */
-function nodeCallbackAsPromise (fn: Function, ...initialArgs: Array<any>): Promise<any> {
-  return new Promise((resolve, reject) => {
-    fn(...initialArgs, (err, data) => err != null ? reject(err) : resolve(data))
-  })
+export function stderr (): Consumer<string> {
+  return consumerFromStream(process.stderr)
 }
-
-export default { readFile, readStream }

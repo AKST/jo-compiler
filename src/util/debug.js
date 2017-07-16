@@ -13,3 +13,7 @@ export function notImplemented (reasonMaybe: ?string) {
     return { ...descriptor, get }
   }
 }
+
+export function formatError (error: Error): string {
+  return error.stack
+}

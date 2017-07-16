@@ -5,6 +5,16 @@ export type ConfigDebugBuild
 export type ConfigDebugRepl
   = { mode: 'debug:repl', debug: DebugMode }
 
+/**
+ * This is the type of a repl interface.
+ */
+export type ReplInterface = {
+  startInput: string,
+  continueInput: string,
+  startOutput: string,
+  continueOutput: string,
+}
+
 export type ConfigDescriptor
   = ConfigDebugBuild
   | ConfigDebugRepl
@@ -29,6 +39,18 @@ export function createConfig (config: ConfigDescriptor): ConfigDescriptor {
     validDebugMode(config.debug)
   }
   return Object.freeze(config)
+}
+
+/**
+ * The default interface for a repl.
+ */
+export function defaultReplInterface (): ReplInterface {
+  return {
+    startInput: '-> ',
+    continueInput: ' |',
+    startOutput: '-= ',
+    continueOutput: ' | ',
+  }
 }
 
 /**

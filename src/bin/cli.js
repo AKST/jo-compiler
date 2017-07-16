@@ -5,6 +5,7 @@ import type { ConfigDescriptor } from '@/data/config'
 
 import getConfig from '@/core/args'
 import { withFiles as debugFiles, withRepl as debugRepl } from '@/core/debug'
+import { formatError } from '@/util/debug'
 
 import {
   stdin as inputStream,
@@ -31,7 +32,7 @@ export async function main (): Promise<number> {
 }
 
 async function onError (error: Error): Promise<number> {
-  console.error(error.toString())
+  console.error(formatError(error))
   return 1
 }
 
