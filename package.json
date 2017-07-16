@@ -35,10 +35,10 @@
     "pre-commit": "^1.2.2"
   },
   "dependencies": {
+    "@akst.io/stream-to-async-iterator": "^0.2.2",
     "argus-pagus": "0.2.3",
     "command-line-args": "^4.0.2",
     "flow-classy-type-wrapper": "^1.0.2",
-    "fs-promise": "^2.0.2",
-    "stream-to-async-iterator": "^0.2.0"
+    "fs-promise": "^2.0.2"
   }
 }

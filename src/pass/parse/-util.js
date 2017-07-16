@@ -1,9 +1,9 @@
 // @flow
-import ParseError, * as parseErrors from '@/data/error/parse'
-import Syntax from '@/data/pass/syntax'
-import Lexicon, * as lex from '@/data/pass/lexer'
+import ParseError, * as parseErrors from '~/data/error/parse'
+import Syntax from '~/data/pass/syntax'
+import Lexicon, * as lex from '~/data/pass/lexer'
 import State from './-state'
-import type { Position } from '@/data/location'
+import type { Position } from '~/data/location'
 
 export type ReadUpdate<T> = { value: T, update: State }
 export type Parser<T> = (state: State) => Promise<ReadUpdate<T>>

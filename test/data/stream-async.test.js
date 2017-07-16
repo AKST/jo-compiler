@@ -1,6 +1,6 @@
 // @flow
-import { withIterable } from '@/data/stream-async'
-import { asyncIter as getAsyncIter } from '@/util/data'
+import { withIterable } from '~/data/stream-async'
+import { asyncIter as getAsyncIter } from '~/util/data'
 
 async function* asyncIter<T> (self: Iterable<T>): AsyncIterator<T> {
   for (const it of self) yield it

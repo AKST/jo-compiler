@@ -2,8 +2,8 @@
 import fs from 'fs'
 import fsPromise from 'fs-promise'
 
-import Consumer, { consumerFromStream } from '@/data/reactive/consumer'
-import Producer, { producerFromStream } from '@/data/reactive/producer'
+import Consumer, { consumerFromStream } from '~/data/reactive/consumer'
+import Producer, { producerFromStream } from '~/data/reactive/producer'
 
 export type InputProducer = Producer<string>
 export type OutputConsumer = Consumer<string>

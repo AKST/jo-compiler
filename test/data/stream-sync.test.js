@@ -1,6 +1,6 @@
 // @flow
-import { withIterable } from '@/data/stream-sync'
-import { iter as getIter } from '@/util/data'
+import { withIterable } from '~/data/stream-sync'
+import { iter as getIter } from '~/util/data'
 
 test('finishes at last character', () => {
   const sInput = 'abc'

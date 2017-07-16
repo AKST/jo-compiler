@@ -1,7 +1,7 @@
 // @flow
-import type { Maybe } from '@/data/maybe'
-import { just, none } from '@/data/maybe'
-import { iter } from '@/util/data'
+import type { Maybe } from '~/data/maybe'
+import { just, none } from '~/data/maybe'
+import { iter } from '~/util/data'
 
 /**
  * Makes a SyncStream from an iterator.

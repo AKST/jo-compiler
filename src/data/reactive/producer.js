@@ -1,5 +1,6 @@
 // @flow
-import S2A from 'stream-to-async-iterator'
+import S2A from '@akst.io/stream-to-async-iterator'
+// import S2A from '/Users/angus/code/orgs/-open-source/node-stream-to-async-iterator/build/stream-to-async-iterator.js'
 
 export type Result<T> = { done: false, value: T } | { done: true }
 

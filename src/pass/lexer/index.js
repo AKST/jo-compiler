@@ -1,13 +1,13 @@
 // @flow
-import type Token from '@/data/pass/lexer'
-import type { StateProcess } from '@/pass/lexer/state'
+import type Token from '~/data/pass/lexer'
+import type { StateProcess } from '~/pass/lexer/state'
 
-import { withIterable as initSyncStream, T as SyncStream } from '@/data/stream-sync'
-import { withIterable as initAsyncStream, T as AsyncStream } from '@/data/stream-async'
-import * as tokens from '@/data/pass/lexer'
-import { init } from '@/util/data'
-import * as error from '@/data/error/lexer'
-import State from '@/pass/lexer/state'
+import { withIterable as initSyncStream, T as SyncStream } from '~/data/stream-sync'
+import { withIterable as initAsyncStream, T as AsyncStream } from '~/data/stream-async'
+import * as tokens from '~/data/pass/lexer'
+import { init } from '~/util/data'
+import * as error from '~/data/error/lexer'
+import State from '~/pass/lexer/state'
 
 export type { State, Token as Data }
 

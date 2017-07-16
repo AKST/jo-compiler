@@ -1,6 +1,6 @@
 // @flow
-import type { Maybe } from '@/data/maybe'
-import { just, none } from '@/data/maybe'
+import type { Maybe } from '~/data/maybe'
+import { just, none } from '~/data/maybe'
 
 export function withIterable<T> (iterable: AsyncIterable<T>): AsyncStream<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/1163

@@ -1,10 +1,10 @@
 // @flow
-import { T as AsyncStream } from '@/data/stream-async'
-import { Position } from '@/data/location'
+import { T as AsyncStream } from '~/data/stream-async'
+import { Position } from '~/data/location'
 
-import ParseError, * as parseErrors from '@/data/error/parse'
-import Lexicon from '@/data/pass/lexer'
-import { init } from '@/util/data'
+import ParseError, * as parseErrors from '~/data/error/parse'
+import Lexicon from '~/data/pass/lexer'
+import { init } from '~/util/data'
 
 export type Input = AsyncStream<Lexicon>
 

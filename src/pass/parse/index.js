@@ -1,10 +1,10 @@
 // @flow
 
-import { T as AsyncStream, withIterable } from '@/data/stream-async'
-import Syntax, * as syn from '@/data/pass/syntax'
-import Lexicon, * as lex from '@/data/pass/lexer'
-import Location from '@/data/location'
-import { init } from '@/util/data'
+import { T as AsyncStream, withIterable } from '~/data/stream-async'
+import Syntax, * as syn from '~/data/pass/syntax'
+import Lexicon, * as lex from '~/data/pass/lexer'
+import Location from '~/data/location'
+import { init } from '~/util/data'
 
 import type { ReadUpdate, Reader } from './-util'
 import State from './-state'

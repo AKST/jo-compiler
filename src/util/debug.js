@@ -1,4 +1,4 @@
-import { Unimplemented } from '@/data/error'
+import { Unimplemented } from '~/data/error'
 
 export function notImplemented (reasonMaybe: ?string) {
   return (target, key, descriptor) => {

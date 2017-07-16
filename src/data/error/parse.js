@@ -1,7 +1,7 @@
 // @flow
-import JoError from '@/data/error'
-import Lexicon from '@/data/pass/lexer'
-import type { Position } from '@/data/location'
+import JoError from '~/data/error'
+import Lexicon from '~/data/pass/lexer'
+import type { Position } from '~/data/location'
 
 export function deepestError (a: ?SyntaxError, b: ?SyntaxError): ?SyntaxError {
   if (a == null) return b

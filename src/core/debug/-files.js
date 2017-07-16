@@ -1,12 +1,12 @@
 // @flow
-import type { ConfigDebugBuild, DebugMode } from '@/data/config'
-import type Token from '@/data/pass/lexer'
-import type Syntax from '@/data/pass/syntax'
+import type { ConfigDebugBuild, DebugMode } from '~/data/config'
+import type Token from '~/data/pass/lexer'
+import type Syntax from '~/data/pass/syntax'
 
-import { Unimplemented } from '@/data/error'
-import { readStream } from '@/util/io'
-import { syntaxStream } from '@/pass/parse'
-import { tokenStream } from '@/pass/lexer'
+import { Unimplemented } from '~/data/error'
+import { readStream } from '~/util/io'
+import { syntaxStream } from '~/pass/parse'
+import { tokenStream } from '~/pass/lexer'
 
 /////////////////////////////////////////////////////////
 
