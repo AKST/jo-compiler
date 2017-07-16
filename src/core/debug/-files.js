@@ -39,7 +39,8 @@ function getTotalPass (mode: DebugMode): TotalPass {
    */
   async function lexerPass (filename: string): Promise<Result<Array<Token>>> {
     const result = { filename, data: [] }
-    for await (const token of tokenStream(readStream(filename))) {
+    const stream = tokenStream(readStream(filename).unsafeAsGenerator())
+    for await (const token of stream) {
       result.data.push(token)
     }
     return result
@@ -50,7 +51,7 @@ function getTotalPass (mode: DebugMode): TotalPass {
    */
   async function parsePass (filename: string): Promise<Result<Array<Syntax>>> {
     const result = { filename, data: [] }
-    const tokens = tokenStream(readStream(filename))
+    const tokens = tokenStream(readStream(filename).unsafeAsGenerator())
     for await (const syntax of syntaxStream(tokens)) {
       result.data.push(syntax)
     }

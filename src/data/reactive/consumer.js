@@ -2,15 +2,20 @@
 
 export default class Consumer<T> {
   _generator: AsyncGenerator<void, void, T>
+  _firstCall: boolean
 
   constructor (generator: AsyncGenerator<void, void, T>) {
+    this._firstCall = true
     this._generator = generator
   }
 
-  async consume (text: T): Promise<void> {
+  async push (text: T): Promise<void> {
+    if (this._firstCall) {
+      // $FlowTodo
+      await this._generator.next(null)
+      this._firstCall = false
+    }
     await this._generator.next(text)
-    :qa
-    :q
   }
 
   static makeWith (generator: () => AsyncGenerator<void, void, T>): Consumer<T> {

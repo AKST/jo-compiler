@@ -1,46 +1,38 @@
 // @flow
 import fs from 'fs'
 import fsPromise from 'fs-promise'
-import S2A from 'stream-to-async-iterator'
 
 import Consumer, { consumerFromStream } from '@/data/reactive/consumer'
+import Producer, { producerFromStream } from '@/data/reactive/producer'
 
-export type StrIOIter = AsyncIterator<string>
-
-export type InputObservable = {}
-
+export type InputProducer = Producer<string>
 export type OutputConsumer = Consumer<string>
 
 export const readFile = fsPromise.readFile
 
-export async function* readStream (fileName: string, options?: Object = {}): StrIOIter {
+export function readStream (fileName: string, options?: Object = {}): InputProducer {
   const _options = { defaultEncoding: 'utf8', ...options }
-  const iter = new S2A(fs.createReadStream(fileName, { ..._options }))
-  for await (const chunk of iter) {
-    yield chunk.toString()
-  }
+  const fstream = fs.createReadStream(fileName, { ..._options })
+  return producerFromStream(fstream)
 }
 
 /**
  * Creates an async generator of input from stdin.
  */
-export async function* stdin (): StrIOIter {
-  const iter = new S2A(process.stdin)
-  for await (const chunk of iter) {
-    yield chunk.toString()
-  }
+export function stdin (): InputProducer {
+  return producerFromStream(process.stdin)
 }
 
 /**
  * Output consumer for stdout.
  */
-export function stdout (): Consumer<string> {
+export function stdout (): OutputConsumer {
   return consumerFromStream(process.stdout)
 }
 
 /**
  * Output consumer for stdout.
  */
-export function stderr (): Consumer<string> {
+export function stderr (): OutputConsumer {
   return consumerFromStream(process.stderr)
 }
