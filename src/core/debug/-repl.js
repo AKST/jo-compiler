@@ -49,6 +49,13 @@ interface PipeReply<O, S> {
 type ReplyChunk<O, S> = ReplyChunkContinue<O>
                       | ReplyChunkSuspended<S>
 
+/**
+ * Incrementally processes chunks of output from a repl state.
+ *
+ * @param reply - The reply object.
+ * @param cli - Interface for the cli.
+ * @param out - Where output is directed.
+ */
 async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterface, out: OutputConsumer): Promise<S> {
   loop: while (true) {
     const update = await reply.pullChunk()
@@ -56,25 +63,31 @@ async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterfac
       case 'data': {
         const asJson = JSON.stringify(update.value, null, 2)
         out.push(formatOutput(cli, asJson))
-        continue loop;
+        continue loop
       }
       case 'suspend': {
         return update.state
       }
     }
   }
-  throw new Unimplemented('unreachable');
+  // eslint-disable-next-line no-unreachable
+  throw new Unimplemented('unreachable')
 }
+
 
 /////////////////////////////////////////////////////////
 
+
+/**
+ * @param mode - The debug mode for the pipe.
+ */
 function getPipe (mode: DebugMode): Pipe<string, any, any> {
   type DumbReply = { state: number } & PipeReply<any, any>
   const dumbyReply = (): DumbReply => ({
     state: 0,
 
     pullChunk () {
-      this.state++
+      this.state += 1
       return this.state > 3
         ? Promise.resolve({ type: 'suspend', state: null })
         : Promise.resolve({ type: 'data', value: null })
@@ -94,8 +107,8 @@ function getPipe (mode: DebugMode): Pipe<string, any, any> {
 }
 
 
-
 /////////////////////////////////////////////////////////
+//
 
 function formatOutput (cliInterface: ReplInterface, output: string): string {
   const split: Iterable<string> = takeWhile(it => !! it.trim())(output.split('\n'))
