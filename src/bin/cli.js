@@ -1,4 +1,5 @@
 // @flow
+import 'source-map-support/register'
 import 'babel-polyfill'
 import { Unimplemented } from '~/data/error'
 import type { ConfigDescriptor } from '~/data/config'

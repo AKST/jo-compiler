@@ -13,7 +13,7 @@ flow-typed: node_modules
 	./node_modules/.bin/flow-typed install
 
 build: node_modules
-	./node_modules/.bin/babel src --out-dir dist/src
+	./node_modules/.bin/babel src --out-dir dist/src --source-maps inline
 	cp ./package.json ./dist/.
 	@for bin_file in ./dist/src/bin/*.js; do \
 		echo "#!$$(which env) node\n$$(cat $$bin_file)" > $$bin_file; \

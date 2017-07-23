@@ -39,7 +39,7 @@ export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
  * @param state - The lexer state.
  * @param iterator - An iterator for the state of the lexer.
  */
-export async function* asyncStateMachine (state: State, iterator: AsyncIterable<string>): AsyncGenerator<Token, State, void> {
+export async function* asyncStateMachine (state: State, iterator: AsyncIterable<string> | Iterable<string>): AsyncGenerator<Token, State, void> {
   // $FlowTodo
   const { done, value } = await iterator.next()
 

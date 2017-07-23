@@ -3,7 +3,7 @@
 import type { ConfigDebugRepl, ReplInterface, DebugMode } from '~/data/config'
 import type { InputProducer, OutputConsumer } from '~/util/io'
 
-import { withIterable as toSyncStream } from '~/data/stream-sync'
+import type { Data as Lexicon, State as LexState } from '~/pass/lexer'
 import { initialState, asyncStateMachine } from '~/pass/lexer'
 
 import { Unimplemented } from '~/data/error'
@@ -37,20 +37,21 @@ export async function withRepl (
 
 /////////////////////////////////////////////////////////
 
-type ReplyChunkContinue<O> = { type: 'data', value: O }
-type ReplyChunkSuspended<S> = { type: 'suspend', state: S }
+type ReplyChunk<O, S> = { type: 'data', value: O }
+                      | { type: 'suspend', state: S }
 
 interface Pipe<I, O, S> {
   push (input: I): PipeReply<O, S>,
-  pushWith (input: I, state: O): PipeReply<O, S>,
+  pushWith (input: I, state: S): PipeReply<O, S>,
 }
 
 interface PipeReply<O, S> {
   pullChunk (): Promise<ReplyChunk<O, S>>,
 }
 
-type ReplyChunk<O, S> = ReplyChunkContinue<O>
-                      | ReplyChunkSuspended<S>
+function omitLocationInJson (k, v) {
+  return k === 'location' ? undefined : v
+}
 
 /**
  * Incrementally processes chunks of output from a repl state.
@@ -64,7 +65,7 @@ async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterfac
     const update = await reply.pullChunk()
     switch (update.type) {
       case 'data': {
-        const asJson = JSON.stringify(update.value, null, 2)
+        const asJson = JSON.stringify(update.value, omitLocationInJson)
         out.push(formatOutput(cli, asJson))
         continue loop
       }
@@ -81,15 +82,35 @@ async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterfac
 /////////////////////////////////////////////////////////
 
 
-class LexerPipe {
-  push (s: string) {
-    const state = initialState()
-    const generator = asyncStateMachine(state, toSyncStream(s).pretendAsync())
-    throw new Unimplemented('not implemented')
+class _GenToPipeReply<O, S> implements PipeReply<O, S> {
+  _gen: AsyncGenerator<O, S, any>
+
+  constructor (gen: AsyncGenerator<O, S, any>) {
+    this._gen = gen
   }
 
-  pushWith (s: string, state: any) {
-    throw new Unimplemented('not implemented')
+  async pullChunk (): Promise<ReplyChunk<O, S>> {
+    const { done, value } = await this._gen.next()
+
+    if (value == null) throw new TypeError('illegal state')
+    return (((done
+      ? { type: 'suspend', state: value }
+      : { type: 'data', value: value }
+    ): any): ReplyChunk<O, S>)
+  }
+}
+
+
+class LexerPipe implements Pipe<string, Lexicon, LexState> {
+  push (s: string): PipeReply<Lexicon, LexState> {
+    return this.pushWith(s, initialState())
+  }
+
+  pushWith (s: string, state: LexState) {
+    // $FlowTodo This is literally the only way to start a iterator
+    const input = [s][Symbol.iterator]()
+    const generator = asyncStateMachine(state, input)
+    return new _GenToPipeReply(generator)
   }
 }
 
@@ -134,6 +155,6 @@ function getPipe (mode: DebugMode): Pipe<string, any, any> {
 
 function formatOutput (cliInterface: ReplInterface, output: string): string {
   const split: Iterable<string> = takeWhile(it => !! it.trim())(output.split('\n'))
-  const joined = join(`\n${cliInterface.continueInput}`)(split)
+  const joined = join(`\n${cliInterface.continueOutput}`)(split)
   return `${cliInterface.startOutput}${joined}\n`
 }
