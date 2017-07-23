@@ -3,6 +3,9 @@
 import type { ConfigDebugRepl, ReplInterface, DebugMode } from '~/data/config'
 import type { InputProducer, OutputConsumer } from '~/util/io'
 
+import { withIterable as toSyncStream } from '~/data/stream-sync'
+import { initialState, asyncStateMachine } from '~/pass/lexer'
+
 import { Unimplemented } from '~/data/error'
 import { defaultReplInterface } from '~/data/config'
 import { takeWhile, join } from '~/util/array'
@@ -80,6 +83,8 @@ async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterfac
 
 class LexerPipe {
   push (s: string) {
+    const state = initialState()
+    const generator = asyncStateMachine(state, toSyncStream(s).pretendAsync())
     throw new Unimplemented('not implemented')
   }
 

@@ -3,6 +3,11 @@ import type { Maybe } from '~/data/maybe'
 import { just, none } from '~/data/maybe'
 import { iter } from '~/util/data'
 
+import {
+  T as AsyncStream,
+  withIterable as withAsyncIterable,
+} from './stream-async'
+
 /**
  * Makes a SyncStream from an iterator.
  *
@@ -80,6 +85,12 @@ export class SyncStream<T> {
    */
   shiftForward (): SyncStream<T> {
     throw new TypeError('abstract method')
+  }
+
+  pretendAsync (): AsyncStream<T> {
+    return withAsyncIterable(async function* () {
+      for (const i of this) yield i
+    }.call(this))
   }
 
   /*::
