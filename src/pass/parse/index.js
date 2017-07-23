@@ -1,6 +1,6 @@
 // @flow
 
-import { T as AsyncStream, withIterable } from '~/data/stream-async'
+import { T as AsyncStream, withIterable, withIterable as initAsyncStream } from '~/data/stream-async'
 import Syntax, * as syn from '~/data/pass/syntax'
 import Lexicon, * as lex from '~/data/pass/lexer'
 import Location from '~/data/location'
@@ -14,7 +14,18 @@ import {
   unexpectedLexicon,
 } from './-util'
 
+export type { Syntax as Data, State }
 
+export function initialState (): State {
+  return State.create(initAsyncStream())
+}
+
+/**
+ * Generates a stream of syntax trees from a stream of lexicons.
+ *
+ * @param tokens - A stream of lexicons.
+ * @returns An immutable async stream of syntax trees.
+ */
 export function syntaxStream (tokens: AsyncStream<Lexicon>): AsyncStream<Syntax> {
   return withIterable(streamSyntax(State.create(tokens)))
 }

@@ -2,9 +2,10 @@
 import type { Maybe } from '~/data/maybe'
 import { just, none } from '~/data/maybe'
 
-export function withIterable<T> (iterable: AsyncIterable<T>): AsyncStream<T> {
+export function withIterable<T> (iterable: ?AsyncIterable<T>): AsyncStream<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/1163
-  return _withIter(iterable[Symbol.asyncIterator]())
+  const iter = iterable == null ? (async function* () {}()) : iterable[Symbol.asyncIterator]()
+  return _withIter(iter)
 }
 
 export function withGenerator<T> (iterable: AsyncGenerator<T, any, any>): AsyncStream<T> {

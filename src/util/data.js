@@ -62,4 +62,3 @@ export function asyncIter<T> (asyncIterable: AsyncIterable<T>): AsyncIterator<T>
   // $FlowTodo: https://github.com/facebook/flow/issues/2286
   return asyncIterable[Symbol.asyncIterator]()
 }
-

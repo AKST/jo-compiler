@@ -24,7 +24,6 @@ export function initialState (): State {
  * the stream, until it reaches the end of the stream.
  *
  * @param input - A stream of strings.
- *
  * @returns An immutable async stream of Tokens.
  */
 export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {

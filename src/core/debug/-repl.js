@@ -2,9 +2,13 @@
 
 import type { ConfigDebugRepl, ReplInterface, DebugMode } from '~/data/config'
 import type { InputProducer, OutputConsumer } from '~/util/io'
+import { iter } from '~/util/data'
 
 import type { Data as Lexicon, State as LexState } from '~/pass/lexer'
-import { initialState, asyncStateMachine } from '~/pass/lexer'
+import * as lexer from '~/pass/lexer'
+
+import type { Data as Syntax, State as ParseState } from '~/pass/parse'
+import * as parser from '~/pass/parse'
 
 import { Unimplemented } from '~/data/error'
 import { defaultReplInterface } from '~/data/config'
@@ -30,8 +34,6 @@ export async function withRepl (
       ? intepreter.push(update.value)
       : intepreter.pushWith(update.value, state)
     state = await processChunks(response, cli, output)
-
-    // await output.push(formatOutput(cli, update.value))
   }
 }
 
@@ -65,7 +67,7 @@ async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterfac
     const update = await reply.pullChunk()
     switch (update.type) {
       case 'data': {
-        const asJson = JSON.stringify(update.value, omitLocationInJson)
+        const asJson = JSON.stringify(update.value, omitLocationInJson, 2)
         out.push(formatOutput(cli, asJson))
         continue loop
       }
@@ -93,6 +95,9 @@ class _GenToPipeReply<O, S> implements PipeReply<O, S> {
     const { done, value } = await this._gen.next()
 
     if (value == null) throw new TypeError('illegal state')
+
+    // IDK what the go with flow is, not sure why i can't
+    // return the property type here.
     return (((done
       ? { type: 'suspend', state: value }
       : { type: 'data', value: value }
@@ -103,14 +108,23 @@ class _GenToPipeReply<O, S> implements PipeReply<O, S> {
 
 class LexerPipe implements Pipe<string, Lexicon, LexState> {
   push (s: string): PipeReply<Lexicon, LexState> {
-    return this.pushWith(s, initialState())
+    return this.pushWith(s, lexer.initialState())
   }
 
   pushWith (s: string, state: LexState) {
-    // $FlowTodo This is literally the only way to start a iterator
-    const input = [s][Symbol.iterator]()
-    const generator = asyncStateMachine(state, input)
+    const input = iter([s])
+    const generator = lexer.asyncStateMachine(state, input)
     return new _GenToPipeReply(generator)
+  }
+}
+
+class ParsePipe implements Pipe<string, Syntax, ParseState> {
+  push (s: string): PipeReply<Syntax, ParseState> {
+    return this.pushWith(s, parser.initialState())
+  }
+
+  pushWith (s: string, state: ParseState) {
+    throw new Unimplemented('ParsePipe::pushWith not implemented')
   }
 }
 
@@ -118,34 +132,13 @@ class LexerPipe implements Pipe<string, Lexicon, LexState> {
  * @param mode - The debug mode for the pipe.
  */
 function getPipe (mode: DebugMode): Pipe<string, any, any> {
-  type DumbReply = { state: number } & PipeReply<any, any>
-  const dumbyReply = (): DumbReply => ({
-    state: 0,
-
-    pullChunk () {
-      this.state += 1
-      return this.state > 3
-        ? Promise.resolve({ type: 'suspend', state: null })
-        : Promise.resolve({ type: 'data', value: this.state })
-    },
-  })
-
-  const dumbyPipe = {
-    pushWith (s: string, ss: any) {
-      return dumbyReply()
-    },
-    push (s: string) {
-      return dumbyReply()
-    },
-  }
-
   switch (mode) {
     case 'lexer':
       return new LexerPipe()
     case 'parse':
-      return dumbyPipe
+      return new ParsePipe()
     default:
-      throw new Unimplemented('impossible error')
+      throw new Unimplemented(`'${mode}' mode is not supported by debug repl`)
   }
 }
 
