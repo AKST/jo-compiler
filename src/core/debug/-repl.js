@@ -78,6 +78,16 @@ async function processChunks <S> (reply: PipeReply<Object, S>, cli: ReplInterfac
 /////////////////////////////////////////////////////////
 
 
+class LexerPipe {
+  push (s: string) {
+    throw new Unimplemented('not implemented')
+  }
+
+  pushWith (s: string, state: any) {
+    throw new Unimplemented('not implemented')
+  }
+}
+
 /**
  * @param mode - The debug mode for the pipe.
  */
@@ -90,7 +100,7 @@ function getPipe (mode: DebugMode): Pipe<string, any, any> {
       this.state += 1
       return this.state > 3
         ? Promise.resolve({ type: 'suspend', state: null })
-        : Promise.resolve({ type: 'data', value: null })
+        : Promise.resolve({ type: 'data', value: this.state })
     },
   })
 
@@ -103,12 +113,19 @@ function getPipe (mode: DebugMode): Pipe<string, any, any> {
     },
   }
 
-  return dumbyPipe
+  switch (mode) {
+    case 'lexer':
+      return new LexerPipe()
+    case 'parse':
+      return dumbyPipe
+    default:
+      throw new Unimplemented('impossible error')
+  }
 }
 
 
 /////////////////////////////////////////////////////////
-//
+
 
 function formatOutput (cliInterface: ReplInterface, output: string): string {
   const split: Iterable<string> = takeWhile(it => !! it.trim())(output.split('\n'))

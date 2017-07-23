@@ -3,7 +3,7 @@ import type Token from '~/data/pass/lexer'
 import type { StateProcess } from '~/pass/lexer/state'
 
 import { withIterable as initSyncStream, T as SyncStream } from '~/data/stream-sync'
-import { withIterable as initAsyncStream, T as AsyncStream } from '~/data/stream-async'
+import { withGenerator as initAsyncStream, T as AsyncStream } from '~/data/stream-async'
 import * as tokens from '~/data/pass/lexer'
 import { init } from '~/util/data'
 import * as error from '~/data/error/lexer'
@@ -39,7 +39,7 @@ export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
  * @param state - The lexer state.
  * @param iterator - An iterator for the state of the lexer.
  */
-async function* asyncStateMachine (state: State, iterator: AsyncIterable<string>): AsyncIterable<Token> {
+export async function* asyncStateMachine (state: State, iterator: AsyncIterable<string>): AsyncGenerator<Token, State, void> {
   // $FlowTodo
   const { done, value } = await iterator.next()
 
@@ -50,8 +50,9 @@ async function* asyncStateMachine (state: State, iterator: AsyncIterable<string>
     const stream = initSyncStream(value)
     // $FlowTodo
     const update = yield * withState(state, stream)
-    yield * asyncStateMachine(update, iterator)
+    return yield * asyncStateMachine(update, iterator)
   }
+  return state
 }
 
 /**
@@ -67,7 +68,7 @@ async function* asyncStateMachine (state: State, iterator: AsyncIterable<string>
  * the iterator, which can be passed back into this function for
  * additional input.
  */
-export function withState (state: State, stream: SyncStream<string>): StateProcess {
+function withState (state: State, stream: SyncStream<string>): StateProcess {
   return loop(state.addInput(stream))
 }
 

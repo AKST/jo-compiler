@@ -6,7 +6,7 @@ import type { ConfigDescriptor } from '~/data/config'
 import getConfig from '~/core/args'
 import { withFiles as debugFiles, withRepl as debugRepl } from '~/core/debug'
 import { formatError } from '~/util/debug'
-import { stdin as inputStream, stdout as outputConsumer, } from '~/util/io'
+import { stdin as inputStream, stdout as outputConsumer } from '~/util/io'
 
 
 export async function main (): Promise<number> {

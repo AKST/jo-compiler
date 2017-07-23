@@ -1,4 +1,4 @@
-import { Unimplemented } from '~/data/error'
+import JoError, { Unimplemented } from '~/data/error'
 
 export function notImplemented (reasonMaybe: ?string) {
   return (target, key, descriptor) => {
@@ -15,5 +15,7 @@ export function notImplemented (reasonMaybe: ?string) {
 }
 
 export function formatError (error: Error): string {
-  return error.stack
+  if (error instanceof JoError) return error.toString()
+  else if (error.stack != null) return error.stack
+  throw new Unimplemented('unimplmented error formatting')
 }
