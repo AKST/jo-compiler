@@ -1,5 +1,5 @@
 // @flow
-import { T as AsyncStream } from '~/data/stream-async'
+import { T as AsyncStream } from '~/data/reactive/stream-async'
 import { Position } from '~/data/location'
 
 import ParseError, * as parseErrors from '~/data/error/parse'

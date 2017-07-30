@@ -1,6 +1,6 @@
 // @flow
 
-import { T as AsyncStream, withIterable } from '~/data/stream-async'
+import { T as AsyncStream, withIterable } from '~/data/reactive/stream-async'
 import Syntax, * as syn from '~/data/pass/syntax'
 import Lexicon, * as lex from '~/data/pass/lexer'
 import Location from '~/data/location'

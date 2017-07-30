@@ -1,5 +1,5 @@
 // @flow
-import { withIterable, withGenerator } from '~/data/stream-async'
+import { withIterable, withGenerator } from '~/data/reactive/stream-async'
 import { asyncIter as getAsyncIter } from '~/util/data'
 
 async function* asyncIter<T> (self: Iterable<T>): AsyncIterator<T> {
