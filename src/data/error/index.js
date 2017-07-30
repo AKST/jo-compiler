@@ -1,12 +1,11 @@
 // @flow
-import { getStack } from './-util'
 
 type JSONShape = {
   meta: { code: Array<string>, message: string },
   data?: Object,
 }
 
-export default class JoError {
+export default class JoError extends Error {
   /**
    * Think of code as meta data tags associted with the
    * reason for the code failing.
@@ -14,19 +13,15 @@ export default class JoError {
   code: Array<string>
 
   /**
-   * Stack trace
-   */
-  stack: Array<string>
-
-  /**
    * Friendly error message intended for project maintainer
    */
   message: string
 
   constructor (code: Array<string>, message: string) {
+    super(message)
     this.message = message
     this.code = code
-    this.stack = getStack(4)
+    Error.captureStackTrace(this, this.constructor)
   }
 
   /**
@@ -47,7 +42,7 @@ export default class JoError {
 
   toString () {
     const message = `message:\n  - ${this.message}`
-    const stackTrace = `stack:\n${this.stack.join('\n')}`
+    const stackTrace = `stack:\n${this.stack.split('\n').slice(1).join('\n')}`
     const metaData = `tags:${this.code.map(it => `\n  - ${it}`).join('')}`
     return `${metaData}\n${message}\n${stackTrace}`
   }

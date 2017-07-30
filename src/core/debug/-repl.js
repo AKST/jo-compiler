@@ -10,8 +10,7 @@ import * as lexer from '~/pass/lexer'
 import type { Data as Syntax, State as ParseState } from '~/pass/parse'
 import * as parser from '~/pass/parse'
 
-
-import * as monitor from '~/data/reactive/monitor'
+import Capture from '~/data/reactive/async-gen-capture'
 import { Unimplemented } from '~/data/error'
 import { defaultReplInterface } from '~/data/config'
 import { takeWhile, join } from '~/util/array'
@@ -114,8 +113,7 @@ class LexerPipe implements Pipe<string, Lexicon, LexState> {
   }
 
   pushWith (s: string, state: LexState) {
-    const input = iter([s])
-    const generator = lexer.asyncStateMachine(state, input)
+    const generator = lexer.asyncStateMachine(state, [s])
     return new _GenToPipeReply(generator)
   }
 }
@@ -142,14 +140,10 @@ class ParsePipe implements Pipe<string, Syntax, ParsePipeState> {
     const [lexStart, synState] = this.__getPassStates(state)
 
     return new _GenToPipeReply(async function* () {
-      const lexicons = lexer.asyncStateMachine(lexStart, iter([s]))
-      const lexiconMonitor = monitor.create(lexicons, 'lexer')
-      const syntax = parser.asyncStateMachine(synState, lexiconMonitor.channel)
-      const syntaxMonitor = monitor.create(syntax, 'syntax')
-      const { lexer: l, syntax: p } = yield * monitor.resolve({
-        yieldFrom: syntaxMonitor,
-        getStatesOf: [lexiconMonitor, syntaxMonitor],
-      })
+      const lexicons =
+        Capture.create(lexer.asyncStateMachine(lexStart, [s]))
+      const p = yield * parser.asyncStateMachine(synState, [lexicons.generator])
+      const l: LexState = (lexicons.finish: any)
       return { type: 'partial', l, p }
     }())
   }
