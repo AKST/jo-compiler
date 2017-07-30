@@ -78,3 +78,15 @@ export function iterateAsAsync<T> (iterable: AsyncIterable<T> | Iterable<T>): As
   }
   throw new TypeError('invalid type')
 }
+
+export function asAsyncIterable<T> (iterable: AsyncIterable<T> | Iterable<T>): AsyncIterable<T> {
+  // $FlowTodo: https://github.com/facebook/flow/issues/2286
+  if (iterable[Symbol.asyncIterator] != null) return iterable
+  // $FlowTodo: https://github.com/facebook/flow/issues/2286
+  return {
+    // $FlowTodo: https://github.com/facebook/flow/issues/2286
+    [Symbol.asyncIterator] () {
+      return iterateAsAsync(iterable)
+    }
+  }
+}

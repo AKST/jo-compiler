@@ -5,7 +5,10 @@ import type { StateProcess } from '~/pass/lexer/state'
 import { withIterable as initSyncStream, T as SyncStream } from '~/data/stream-sync'
 import { withGenerator as initAsyncStream, T as AsyncStream } from '~/data/stream-async'
 import * as tokens from '~/data/pass/lexer'
-import { init } from '~/util/data'
+import {
+  init,
+  iterateAsAsync,
+} from '~/util/data'
 import * as error from '~/data/error/lexer'
 import State from '~/pass/lexer/state'
 
@@ -34,24 +37,25 @@ export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
  * This can be paused and resumed, to continue pause and
  * resume the process of lexing.
  *
- * @access private
- * @param state - The lexer state.
- * @param iterator - An iterator for the state of the lexer.
+ * @access public
+ * @param _state - The lexer state.
+ * @param iterable - An iterator for the state of the lexer.
  */
-export async function* asyncStateMachine (state: State, iterator: AsyncIterable<string> | Iterable<string>): AsyncGenerator<Token, State, void> {
-  // $FlowTodo
-  const { done, value } = await iterator.next()
+export function asyncStateMachine (_state: State, iterable: AsyncIterable<string> | Iterable<string>): AsyncGenerator<Token, State, void> {
+  return (async function* implementation (state: State, iterator: AsyncIterator<string>): AsyncGenerator<Token, State, void> {
+    const { done, value } = await iterator.next()
 
-  if (! done && value == null) {
-    throw new error.EmptyInputError()
-  }
-  else if (! done) {
-    const stream = initSyncStream(value)
-    // $FlowTodo
-    const update = yield * withState(state, stream)
-    return yield * asyncStateMachine(update, iterator)
-  }
-  return state
+    if (! done && value == null) {
+      throw new error.EmptyInputError()
+    }
+    else if (! done) {
+      const stream = initSyncStream(value)
+      // $FlowTodo
+      const update = yield * withState(state, stream)
+      return yield * asyncStateMachine(update, iterator)
+    }
+    return state
+  }(_state, iterateAsAsync(iterable)))
 }
 
 /**

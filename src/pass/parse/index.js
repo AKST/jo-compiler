@@ -5,10 +5,10 @@ import Syntax, * as syn from '~/data/pass/syntax'
 import Lexicon, * as lex from '~/data/pass/lexer'
 import Location from '~/data/location'
 import * as error from '~/data/error/parse'
-import { Unimplemented } from '~/data/error'
 import {
   init,
   iterateAsAsync,
+  asAsyncIterable,
 } from '~/util/data'
 
 import type { ReadUpdate, Reader } from './-util'
@@ -20,7 +20,6 @@ import {
 } from './-util'
 
 export type { Syntax as Data, State }
-
 
 
 export function initialState (): State {
@@ -39,32 +38,32 @@ export function syntaxStream (tokens: AsyncIterable<Lexicon>): AsyncStream<Synta
 
 
 type _Iterable<T> = AsyncIterable<T> | Iterable<T>
-type _Iterator<T> = AsyncIterator<T> | Iterator<T>
 
 type ParamSource = _Iterable<_Iterable<Lexicon>>
-type InternalSource = _Iterator<_Iterable<Lexicon>>
+type InternalSource = AsyncIterator<_Iterable<Lexicon>>
 
+// $FlowTodo I don't really know what's wrong with this code...
 export function asyncStateMachine (_state: State, input: ParamSource): AsyncGenerator<Syntax, State, void> {
   return (async function* implementation (state: State, iterator: InternalSource): AsyncGenerator<Syntax, State, void> {
     const { done, value } = await iterator.next()
 
-    if (! done && value == null) {
+    if (done) return state
+    else if (value == null) {
       throw new error.ImpossibleError()
     }
-    else if (! done && value != null) {
-      const stream = withIterable(iterateAsAsync(value))
-      const updated: State = yield * streamSyntax(state.addInput(stream))
-      return yield * implementation(updated, iterator)
-    }
-    return state
+
+    const iterable: AsyncIterable<Lexicon> = asAsyncIterable(value)
+    const stream: AsyncStream<Lexicon> = withIterable(iterable)
+    const updated: State = yield * loop(state.addInput(stream))
+    return yield * implementation(updated, iterator)
   }(_state, iterateAsAsync(input)))
 }
 
-async function* streamSyntax (state: State): AsyncGenerator<Syntax, State, void> {
+async function* loop (state: State): AsyncGenerator<Syntax, State, void> {
   if (await state.isEmpty()) return state
   const { value: expresssion, update } = await parseExpression(state)
   yield expresssion
-  return yield * streamSyntax(update)
+  return yield * loop(update)
 }
 
 const parseExpression: Reader = choiceOf(
