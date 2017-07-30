@@ -10,6 +10,8 @@ import * as lexer from '~/pass/lexer'
 import type { Data as Syntax, State as ParseState } from '~/pass/parse'
 import * as parser from '~/pass/parse'
 
+
+import * as monitor from '~/data/reactive/monitor'
 import { Unimplemented } from '~/data/error'
 import { defaultReplInterface } from '~/data/config'
 import { takeWhile, join } from '~/util/array'
@@ -118,13 +120,38 @@ class LexerPipe implements Pipe<string, Lexicon, LexState> {
   }
 }
 
-class ParsePipe implements Pipe<string, Syntax, ParseState> {
-  push (s: string): PipeReply<Syntax, ParseState> {
-    return this.pushWith(s, parser.initialState())
+type ParsePipeState = { type: 'initial' }
+                    | { type: 'partial', l: LexState, p: ParseState }
+
+class ParsePipe implements Pipe<string, Syntax, ParsePipeState> {
+  push (s: string): PipeReply<Syntax, ParsePipeState> {
+    return this.pushWith(s, { type: 'initial' })
   }
 
-  pushWith (s: string, state: ParseState) {
-    throw new Unimplemented('ParsePipe::pushWith not implemented')
+  __getPassStates (state: ParsePipeState): [LexState, ParseState] {
+    if (state.type === 'initial') {
+      return [lexer.initialState(), parser.initialState()]
+    }
+    else if (state.type === 'partial') {
+      return [state.l, state.p]
+    }
+    throw new Unimplemented('unimplmented state')
+  }
+
+  pushWith (s: string, state: ParsePipeState): PipeReply<Syntax, ParsePipeState> {
+    const [lexStart, synState] = this.__getPassStates(state)
+
+    return new _GenToPipeReply(async function* () {
+      const lexicons = lexer.asyncStateMachine(lexStart, iter([s]))
+      const lexiconMonitor = monitor.create(lexicons, 'lexer')
+      const syntax = parser.asyncStateMachine(synState, lexiconMonitor.channel)
+      const syntaxMonitor = monitor.create(syntax, 'syntax')
+      const { lexer: l, syntax: p } = yield * monitor.resolve({
+        yieldFrom: syntaxMonitor,
+        getStatesOf: [lexiconMonitor, syntaxMonitor],
+      })
+      return { type: 'partial', l, p }
+    }())
   }
 }
 

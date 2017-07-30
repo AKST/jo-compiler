@@ -1,10 +1,15 @@
 // @flow
 
-import { T as AsyncStream, withIterable, withIterable as initAsyncStream } from '~/data/stream-async'
+import { T as AsyncStream, withIterable } from '~/data/stream-async'
 import Syntax, * as syn from '~/data/pass/syntax'
 import Lexicon, * as lex from '~/data/pass/lexer'
 import Location from '~/data/location'
-import { init } from '~/util/data'
+import * as error from '~/data/error/parse'
+import { Unimplemented } from '~/data/error'
+import {
+  init,
+  iterateAsAsync,
+} from '~/util/data'
 
 import type { ReadUpdate, Reader } from './-util'
 import State from './-state'
@@ -16,8 +21,10 @@ import {
 
 export type { Syntax as Data, State }
 
+
+
 export function initialState (): State {
-  return State.create(initAsyncStream())
+  return State.create(withIterable())
 }
 
 /**
@@ -26,15 +33,38 @@ export function initialState (): State {
  * @param tokens - A stream of lexicons.
  * @returns An immutable async stream of syntax trees.
  */
-export function syntaxStream (tokens: AsyncStream<Lexicon>): AsyncStream<Syntax> {
-  return withIterable(streamSyntax(State.create(tokens)))
+export function syntaxStream (tokens: AsyncIterable<Lexicon>): AsyncStream<Syntax> {
+  return withIterable(asyncStateMachine(initialState(), [tokens]))
 }
 
-async function* streamSyntax (state: State): AsyncIterator<Syntax> {
-  if (await state.isEmpty()) return
+
+type _Iterable<T> = AsyncIterable<T> | Iterable<T>
+type _Iterator<T> = AsyncIterator<T> | Iterator<T>
+
+type ParamSource = _Iterable<_Iterable<Lexicon>>
+type InternalSource = _Iterator<_Iterable<Lexicon>>
+
+export function asyncStateMachine (_state: State, input: ParamSource): AsyncGenerator<Syntax, State, void> {
+  return (async function* implementation (state: State, iterator: InternalSource): AsyncGenerator<Syntax, State, void> {
+    const { done, value } = await iterator.next()
+
+    if (! done && value == null) {
+      throw new error.ImpossibleError()
+    }
+    else if (! done && value != null) {
+      const stream = withIterable(iterateAsAsync(value))
+      const updated: State = yield * streamSyntax(state.addInput(stream))
+      return yield * implementation(updated, iterator)
+    }
+    return state
+  }(_state, iterateAsAsync(input)))
+}
+
+async function* streamSyntax (state: State): AsyncGenerator<Syntax, State, void> {
+  if (await state.isEmpty()) return state
   const { value: expresssion, update } = await parseExpression(state)
   yield expresssion
-  yield * streamSyntax(update)
+  return yield * streamSyntax(update)
 }
 
 const parseExpression: Reader = choiceOf(
