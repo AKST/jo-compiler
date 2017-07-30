@@ -2,7 +2,6 @@
 
 import type { ConfigDebugRepl, ReplInterface, DebugMode } from '~/data/config'
 import type { InputProducer, OutputConsumer } from '~/util/io'
-import { iter } from '~/util/data'
 
 import type { Data as Lexicon, State as LexState } from '~/pass/lexer'
 import * as lexer from '~/pass/lexer'
@@ -140,9 +139,8 @@ class ParsePipe implements Pipe<string, Syntax, ParsePipeState> {
     const [lexStart, synState] = this.__getPassStates(state)
 
     return new _GenToPipeReply(async function* () {
-      const lexicons =
-        Capture.create(lexer.asyncStateMachine(lexStart, [s]))
-      const p = yield * parser.asyncStateMachine(synState, [lexicons.generator])
+      const lexicons = Capture.create(lexer.asyncStateMachine(lexStart, [s]))
+      const p = yield * parser.asyncStateMachine(synState, [lexicons.iterable])
       const l: LexState = (lexicons.finish: any)
       return { type: 'partial', l, p }
     }())

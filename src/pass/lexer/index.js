@@ -33,6 +33,8 @@ export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
   return initAsyncStream(asyncStateMachine(initialState(), input))
 }
 
+type Source<T> = Iterable<T> | AsyncIterable<T>
+
 /**
  * This can be paused and resumed, to continue pause and
  * resume the process of lexing.
@@ -41,7 +43,7 @@ export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
  * @param _state - The lexer state.
  * @param iterable - An iterator for the state of the lexer.
  */
-export function asyncStateMachine (_state: State, iterable: AsyncIterable<string> | Iterable<string>): AsyncGenerator<Token, State, void> {
+export function asyncStateMachine (_state: State, iterable: Source<string>): AsyncGenerator<Token, State, void> {
   return (async function* implementation (state: State, iterator: AsyncIterator<string>): AsyncGenerator<Token, State, void> {
     const { done, value } = await iterator.next()
 

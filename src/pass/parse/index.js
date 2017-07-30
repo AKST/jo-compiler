@@ -37,10 +37,8 @@ export function syntaxStream (tokens: AsyncIterable<Lexicon>): AsyncStream<Synta
 }
 
 
-type _Iterable<T> = AsyncIterable<T> | Iterable<T>
-
-type ParamSource = _Iterable<_Iterable<Lexicon>>
-type InternalSource = AsyncIterator<_Iterable<Lexicon>>
+type ParamSource = AsyncIterable<AsyncIterable<Lexicon>>
+type InternalSource = AsyncIterator<AsyncIterable<Lexicon>>
 
 // $FlowTodo I don't really know what's wrong with this code...
 export function asyncStateMachine (_state: State, input: ParamSource): AsyncGenerator<Syntax, State, void> {

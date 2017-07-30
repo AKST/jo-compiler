@@ -18,6 +18,16 @@ export default class Capture<Y, R> {
     return this[Symbol.asyncIterator]()
   }
 
+  get iterator (): AsyncIterator<Y> {
+    return (async function* (self) {
+      yield * self.generator
+    }(this))
+  }
+
+  get iterable (): AsyncIterable<Y> {
+    return this.iterator
+  }
+
   get finish (): R {
     if (! this._didFinish) throw new TypeError('not finished')
     if (this._finish == null) throw new TypeError('failed')
@@ -47,5 +57,4 @@ export default class Capture<Y, R> {
     return new Capture(generator)
   }
 }
-
 
