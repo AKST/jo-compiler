@@ -1,10 +1,10 @@
 // @flow
-import { T as AsyncStream } from '@/data/stream-async'
-import { Position } from '@/data/location'
+import { T as AsyncStream } from '~/data/reactive/stream-async'
+import { Position } from '~/data/location'
 
-import ParseError, * as parseErrors from '@/data/error/parse'
-import Lexicon from '@/data/pass/lexer'
-import { init } from '@/util/data'
+import ParseError, * as parseErrors from '~/data/error/parse'
+import Lexicon from '~/data/pass/lexer'
+import { init, set } from '~/util/data'
 
 export type Input = AsyncStream<Lexicon>
 
@@ -30,6 +30,11 @@ export default class State {
     const nextInput = await this._input.shiftForward()
     const position = (await this.current).location.end
     return init(State, nextInput, position)
+  }
+
+  addInput (input: Input): State {
+    const _input = this._input.extend(input)
+    return set(this, { _input })
   }
 
   get current (): Promise<Lexicon> {

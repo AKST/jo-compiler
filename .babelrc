@@ -8,7 +8,7 @@
     "transform-function-bind",
     "transform-decorators-legacy",
     ["babel-plugin-root-import", {
-      "rootPathPrefix": "@",
+      "rootPathPrefix": "~",
       "rootPathSuffix": "src"
     }],
     "syntax-flow",

@@ -1,6 +1,6 @@
 // @flow
-import type Location from '@/data/location'
-import { notImplemented } from '@/util/debug'
+import type Location from '~/data/location'
+import { notImplemented } from '~/util/debug'
 
 type SyntaxJSON = { type: string, location: Location, repr?: Object }
 

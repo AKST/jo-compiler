@@ -1,11 +1,15 @@
 // @flow
-import { withIterable } from '@/data/stream-async'
-import { asyncIter as getAsyncIter } from '@/util/data'
+import { withIterable, withGenerator } from '~/data/reactive/stream-async'
+import { asyncIter as getAsyncIter } from '~/util/data'
 
 async function* asyncIter<T> (self: Iterable<T>): AsyncIterator<T> {
   for (const it of self) yield it
 }
 
+async function* asyncGen<T, R> (self: Iterable<T>, ret: R): AsyncGenerator<T, R, void> {
+  for (const it of self) yield it
+  return ret
+}
 
 type Test = Promise<any>
 
@@ -51,6 +55,16 @@ test('extend', async (): Test => {
 test('async iterator', async (): Test => {
   const sInput = asyncIter('abc')
   const stream = withIterable(sInput)
+  const iter = getAsyncIter(stream)
+  expect((await iter.next()).value).toEqual('a')
+  expect((await iter.next()).value).toEqual('b')
+  expect((await iter.next()).value).toEqual('c')
+  expect((await iter.next()).value).toEqual(undefined)
+})
+
+test('omits the last generator value', async (): Test => {
+  const sInput = asyncGen('abc', 5)
+  const stream = withGenerator(sInput)
   const iter = getAsyncIter(stream)
   expect((await iter.next()).value).toEqual('a')
   expect((await iter.next()).value).toEqual('b')

@@ -14,6 +14,7 @@
     "generator-star-spacing": ["error", {"before": false, "after": true }],
     "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
     "no-use-before-define": 0,
+    "no-labels": 0,
     "comma-dangle": ["error", "only-multiline"],
 
     "space-unary-ops": [2, {
@@ -48,7 +49,7 @@
     "flowtype/no-primitive-constructor-types": 2,
     "flowtype/no-weak-types": 0,
     "flowtype/object-type-delimiter": [2, "comma"],
-    "flowtype/require-parameter-type": [2, {
+    "flowtype/require-parameter-type": [0, {
       "excludeArrowFunctions": true
     }],
     "flowtype/require-return-type": [2, {

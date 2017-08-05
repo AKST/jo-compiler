@@ -1,13 +1,18 @@
 // @flow
-import type Token from '@/data/pass/lexer'
-import type { StateProcess } from '@/pass/lexer/state'
+import type Token from '~/data/pass/lexer'
+import type { StateProcess } from '~/pass/lexer/-state'
 
-import { withIterable as initSyncStream, T as SyncStream } from '@/data/stream-sync'
-import { withIterable as initAsyncStream, T as AsyncStream } from '@/data/stream-async'
-import * as tokens from '@/data/pass/lexer'
-import { init } from '@/util/data'
-import * as error from '@/data/error/lexer'
-import State from '@/pass/lexer/state'
+import { withIterable as initSyncStream, T as SyncStream } from '~/data/reactive/stream-sync'
+import { withGenerator as initAsyncStream, T as AsyncStream } from '~/data/reactive/stream-async'
+import * as tokens from '~/data/pass/lexer'
+import {
+  init,
+  iterateAsAsync,
+} from '~/util/data'
+import * as error from '~/data/error/lexer'
+import State from '~/pass/lexer/-state'
+
+export type { State, Token as Data }
 
 /**
  * Makes a piece of state that can be consumed
@@ -22,26 +27,37 @@ export function initialState (): State {
  * the stream, until it reaches the end of the stream.
  *
  * @param input - A stream of strings.
- *
  * @returns An immutable async stream of Tokens.
  */
 export function tokenStream (input: AsyncIterable<string>): AsyncStream<Token> {
-  return initAsyncStream(asyncLoop(initialState(), input))
+  return initAsyncStream(asyncStateMachine(initialState(), input))
 }
 
-async function* asyncLoop (state: State, iterator: AsyncIterable<string>): AsyncIterable<Token> {
-  // $FlowTodo
-  const { done, value } = await iterator.next()
+type Source<T> = Iterable<T> | AsyncIterable<T>
 
-  if (! done && value == null) {
-    throw new error.EmptyInputError()
-  }
-  else if (! done) {
-    const stream = initSyncStream(value)
-    // $FlowTodo
-    const update = yield * withState(state, stream)
-    yield * asyncLoop(update, iterator)
-  }
+/**
+ * This can be paused and resumed, to continue pause and
+ * resume the process of lexing.
+ *
+ * @access public
+ * @param _state - The lexer state.
+ * @param iterable - An iterator for the state of the lexer.
+ */
+export function asyncStateMachine (_state: State, iterable: Source<string>): AsyncGenerator<Token, State, void> {
+  return (async function* implementation (state: State, iterator: AsyncIterator<string>): AsyncGenerator<Token, State, void> {
+    const { done, value } = await iterator.next()
+
+    if (! done && value == null) {
+      throw new error.EmptyInputError()
+    }
+    else if (! done) {
+      const stream = initSyncStream(value)
+      // $FlowTodo
+      const update = yield * withState(state, stream)
+      return yield * asyncStateMachine(update, iterator)
+    }
+    return state
+  }(_state, iterateAsAsync(iterable)))
 }
 
 /**
@@ -57,7 +73,7 @@ async function* asyncLoop (state: State, iterator: AsyncIterable<string>): Async
  * the iterator, which can be passed back into this function for
  * additional input.
  */
-export function withState (state: State, stream: SyncStream<string>): StateProcess {
+function withState (state: State, stream: SyncStream<string>): StateProcess {
   return loop(state.addInput(stream))
 }
 

@@ -1,5 +1,5 @@
 // @flow
-import JoError from '@/data/error'
+import JoError from '~/data/error'
 
 export default class TokenError extends JoError {}
 

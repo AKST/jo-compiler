@@ -1,9 +1,9 @@
 // @flow
-import { version } from '@/../package.json'
+import { version } from '~/../package.json'
 import ArgumentParser from 'argus-pagus'
 
-import { createConfig } from '@/data/config'
-import type { ConfigDescriptor } from '@/data/config'
+import { createConfig } from '~/data/config'
+import type { ConfigDescriptor } from '~/data/config'
 
 const parser = new ArgumentParser({
   version,

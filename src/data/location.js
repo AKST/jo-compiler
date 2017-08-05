@@ -1,6 +1,6 @@
 // @flow
-import { init, set } from '@/util/data'
-import Comparison from '@/data/comparison'
+import { init, set } from '~/util/data'
+import Comparison from '~/data/comparison'
 
 
 export class Position {

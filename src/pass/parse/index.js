@@ -1,10 +1,15 @@
 // @flow
 
-import { T as AsyncStream, withIterable } from '@/data/stream-async'
-import Syntax, * as syn from '@/data/pass/syntax'
-import Lexicon, * as lex from '@/data/pass/lexer'
-import Location from '@/data/location'
-import { init } from '@/util/data'
+import { T as AsyncStream, withIterable } from '~/data/reactive/stream-async'
+import Syntax, * as syn from '~/data/pass/syntax'
+import Lexicon, * as lex from '~/data/pass/lexer'
+import Location from '~/data/location'
+import * as error from '~/data/error/parse'
+import {
+  init,
+  iterateAsAsync,
+  asAsyncIterable,
+} from '~/util/data'
 
 import type { ReadUpdate, Reader } from './-util'
 import State from './-state'
@@ -14,16 +19,49 @@ import {
   unexpectedLexicon,
 } from './-util'
 
+export type { Syntax as Data, State }
 
-export function syntaxStream (tokens: AsyncStream<Lexicon>): AsyncStream<Syntax> {
-  return withIterable(streamSyntax(State.create(tokens)))
+
+export function initialState (): State {
+  return State.create(withIterable())
 }
 
-async function* streamSyntax (state: State): AsyncIterator<Syntax> {
-  if (await state.isEmpty()) return
+/**
+ * Generates a stream of syntax trees from a stream of lexicons.
+ *
+ * @param tokens - A stream of lexicons.
+ * @returns An immutable async stream of syntax trees.
+ */
+export function syntaxStream (tokens: AsyncIterable<Lexicon>): AsyncStream<Syntax> {
+  return withIterable(asyncStateMachine(initialState(), [tokens]))
+}
+
+
+type ParamSource = AsyncIterable<AsyncIterable<Lexicon>>
+type InternalSource = AsyncIterator<AsyncIterable<Lexicon>>
+
+// $FlowTodo I don't really know what's wrong with this code...
+export function asyncStateMachine (_state: State, input: ParamSource): AsyncGenerator<Syntax, State, void> {
+  return (async function* implementation (state: State, iterator: InternalSource): AsyncGenerator<Syntax, State, void> {
+    const { done, value } = await iterator.next()
+
+    if (done) return state
+    else if (value == null) {
+      throw new error.ImpossibleError()
+    }
+
+    const iterable: AsyncIterable<Lexicon> = asAsyncIterable(value)
+    const stream: AsyncStream<Lexicon> = withIterable(iterable)
+    const updated: State = yield * loop(state.addInput(stream))
+    return yield * implementation(updated, iterator)
+  }(_state, iterateAsAsync(input)))
+}
+
+async function* loop (state: State): AsyncGenerator<Syntax, State, void> {
+  if (await state.isEmpty()) return state
   const { value: expresssion, update } = await parseExpression(state)
   yield expresssion
-  yield * streamSyntax(update)
+  return yield * loop(update)
 }
 
 const parseExpression: Reader = choiceOf(

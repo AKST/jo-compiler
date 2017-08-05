@@ -1,14 +1,19 @@
 // @flow
-import type { Maybe } from '@/data/maybe'
-import { just, none } from '@/data/maybe'
+import type { Maybe } from '~/data/maybe'
+import { just, none } from '~/data/maybe'
 
-export function withIterable<T> (iterable: AsyncIterable<T>): AsyncStream<T> {
+export function withIterable<T> (iterable: ?AsyncIterable<T>): AsyncStream<T> {
+  // $FlowTodo: https://github.com/facebook/flow/issues/1163
+  const iter = iterable == null ? (async function* () {}()) : iterable[Symbol.asyncIterator]()
+  return _withIter(iter)
+}
+
+export function withGenerator<T> (iterable: AsyncGenerator<T, any, any>): AsyncStream<T> {
   // $FlowTodo: https://github.com/facebook/flow/issues/1163
   return _withIter(iterable[Symbol.asyncIterator]())
 }
 
-
-function _withIter<T> (iterator: AsyncIterator<T>, extention: ?AsyncStream<T>): AsyncStream<T> {
+function _withIter<T> (iterator: AsyncGenerator<T, any, any>, extention: ?AsyncStream<T>): AsyncStream<T> {
   return new AsyncStream(iterator, extention)
 }
 
@@ -43,7 +48,7 @@ type StreamState<T> = {
    *
    * @access private
    */
-  +iter: AsyncIterator<T>,
+  +iter: AsyncGenerator<T, any, any>,
 
   /**
    * @access private
@@ -74,7 +79,7 @@ function getState<T> (stream: AsyncStream<T>): StreamState<T> {
  * @access public
  */
 export class AsyncStream<T> {
-  constructor (iterator: AsyncIterator<T>, extention: ?AsyncStream<T>) {
+  constructor (iterator: AsyncGenerator<T, any, any>, extention: ?AsyncStream<T>) {
     instances.set(this, {
       current: { kind: 'deferred' },
       next: null,

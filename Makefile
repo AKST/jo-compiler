@@ -13,7 +13,7 @@ flow-typed: node_modules
 	./node_modules/.bin/flow-typed install
 
 build: node_modules
-	./node_modules/.bin/babel src --out-dir dist/src
+	./node_modules/.bin/babel src --out-dir dist/src --source-maps inline
 	cp ./package.json ./dist/.
 	@for bin_file in ./dist/src/bin/*.js; do \
 		echo "#!$$(which env) node\n$$(cat $$bin_file)" > $$bin_file; \
@@ -40,11 +40,14 @@ watch:
 	@which watchman-make > /dev/null || ( echo 'install watchman' && exit 1 )
 	watchman-make -p 'src/**/*.js' 'src/*.js' 'test/**/*.js' 'test/*.js' -t ci
 
-clean:
+reset:
 	rm -rf flow-typed
 	rm -rf node_modules
 	rm -rf dist
 	rm -rf docs
 	make init
+
+clean:
+	rm -rf dist
 
 .PHONY: default watch ci init build clean docs type lint test

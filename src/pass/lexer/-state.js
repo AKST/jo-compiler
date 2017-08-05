@@ -1,9 +1,9 @@
 // @flow
-import type Lexicon from '@/data/pass/lexer'
-import type { Maybe } from '@/data/maybe'
-import type { T as Stream } from '@/data/stream-sync'
-import { Location, Position } from '@/data/location'
-import { init, set } from '@/util/data'
+import type Lexicon from '~/data/pass/lexer'
+import type { Maybe } from '~/data/maybe'
+import type { T as Stream } from '~/data/reactive/stream-sync'
+import { Location, Position } from '~/data/location'
+import { init, set } from '~/util/data'
 
 
 type Input = Stream<string>
