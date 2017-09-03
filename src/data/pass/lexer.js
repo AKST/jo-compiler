@@ -114,6 +114,27 @@ export class StringLexicon extends Lexicon {
 }
 
 /**
+ * Lexicon token that represents an integer
+ */
+export class IntegerLexicon extends Lexicon {
+  static kind: string = 'interger'
+  value: number
+
+  constructor (value: number, location: Location) {
+    super(location)
+    this.value = value
+  }
+
+  get __repr (): Object {
+    return { value: this.value }
+  }
+
+  toString (): string {
+    return `IntegerLexicon { value: ${this.value} }`
+  }
+}
+
+/**
  * Lexical token that represents whitespace
  */
 export class WhiteSpaceLexicon extends Lexicon {
