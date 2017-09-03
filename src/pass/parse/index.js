@@ -66,6 +66,7 @@ async function* loop (state: State): AsyncGenerator<Syntax, State, void> {
 
 const parseExpression: Reader = choiceOf(
   parseIdentifier,
+  parseInteger,
   parseString,
   parseCompoundExpression,
 )
@@ -112,6 +113,21 @@ async function parseIdentifier (initialState: State): Promise<ReadUpdate<Syntax>
     // make sure if forgets about this token
     update: await stateUpdate.shiftForward(),
     value: init(syn.IdentiferSyntax, token.location, token.identifier),
+  }
+}
+
+async function parseInteger (initialState: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(initialState)
+  const token = await stateUpdate.current
+
+  if (! (token instanceof lex.IntegerLexicon)) {
+    throw unexpectedLexicon.call(stateUpdate, token, lex.IdentifierLexicon)
+  }
+
+  return {
+    // make sure if forgets about this token
+    update: await stateUpdate.shiftForward(),
+    value: init(syn.IntegerSyntax, token.location, token.value),
   }
 }
 

@@ -96,6 +96,10 @@ function* branchInit (character: string, state: State): StateProcess {
   if (isWhitespace(character)) {
     return state.setBranch(branchWS)
   }
+  else if (isNumber(character)) {
+    return state.shiftForward()
+      .setBranch(branchInteger)
+  }
   else if (isAlpha(character)) {
     return state.shiftForward()
       .setBranch(branchId)
@@ -134,6 +138,18 @@ function* branchId (character: string, state: State): StateProcess {
   }
 }
 
+function* branchInteger (character: string, state: State): StateProcess {
+  if (isNumber(character)) {
+    return state.shiftForward()
+  }
+  else {
+    const value = parseInt(state.enqueued, 10)
+    const location = state.location
+    yield init(tokens.IntegerLexicon, value, location)
+    return state.dropBuffer().setBranch(branchInit)
+  }
+}
+
 function* branchString (character: string, state: State): StateProcess {
   if (character !== '"') {
     return state.shiftForward()
@@ -160,6 +176,10 @@ function* branchWS (character: string, state: State): StateProcess {
 }
 
 ///////////////////////////////////////////////////////////
+
+function isNumber (character: string): boolean {
+  return !! character.match(/^[0-9]$/)
+}
 
 function isAlpha (character: string): boolean {
   return !! character.match(/^[a-zA-Z]$/)

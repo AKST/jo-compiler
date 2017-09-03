@@ -66,6 +66,20 @@ export class IdentiferSyntax extends Syntax {
   }
 }
 
+export class IntegerSyntax extends Syntax {
+  static kind: string = 'integer'
+  value: number
+
+  constructor (location: Location, value: number) {
+    super(location)
+    this.value = value
+  }
+
+  get __repr (): Object {
+    return { value: this.value }
+  }
+}
+
 export class StringSyntax extends Syntax {
   static kind: string = 'string'
   contents: string
