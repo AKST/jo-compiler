@@ -81,25 +81,9 @@ try to keep this up to date (A commented version is in the `examples` folder).
   .export main          behave-as: '[script main default]
 ```
 
-## Dev Setup
+## Development Notes
 
-```
-make init
-```
-
-### Dependencies
-
-- Node
-  - I'm using 7.3.0 for development, but we should probably move to a
-    more stable version of node, to be honest.
-- [Yarn](https://yarnpkg.com/lang/en/docs/install/)
-  - Techinically you can use npm, but the build system is just configured
-    to use yarn, it'll make your life easier if you set it up. It's also
-    messy to manage a built that falls back to vanilla npm.
-- [Watch man](https://facebook.github.io/watchman/docs/install.html)
-  - This is more a convience that is completely optional, but
-
-## Testings
+### Testings
 
 This will run before each commit anyways, but it'll run
 linting as well as type checking on the source code, rebuild
@@ -108,3 +92,43 @@ the source then run the tests.
 ```
 make ci
 ```
+
+### Local Setup
+
+This will install all the global dependencies required to work on this
+project. If you're not intested in that I'd recommend you give the docker
+setup a spin. But to work on this project a specfic version of LLVM is
+required.
+
+```
+./scripts/install-shared-libraries.bash
+make init
+```
+
+### Setup Docker image
+
+Will setup a container of the developer environment to work on this project
+without polluting your local machine with global dependencies, like LLVM.
+
+```
+./scripts/build-image.bash
+docker run -it --rm jo
+```
+
+### Dependencies
+
+- [Docker](https://www.docker.com)
+  - Mostly used to produce the developement & test environment, if you
+    get this working you don't really have to worry about much else listed here.
+- [LLVM](https://nodejs.org)
+  - Instead of setting this up locally I'd recommend using the docker container,
+    but you can follow the steps shown above to get llvm working on your machine.
+- [Node](https://nodejs.org)
+  - I'm using 6.11.2 for development.
+- [Yarn](https://yarnpkg.com/lang/en/docs/install/)
+  - Techinically you can use npm, but the build system is just configured
+    to use yarn, it'll make your life easier if you set it up. It's also
+    messy to manage a built that falls back to vanilla npm.
+- [Watch man](https://facebook.github.io/watchman/docs/install.html)
+  - This is more a convience that is completely optional, but
+

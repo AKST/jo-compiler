@@ -1,13 +1,26 @@
+
+SYSTEM=$(shell uname)
+
+ifeq ($(SYSTEM),Linux)
+	YARN_ENV=GYP_DEFINES="LLVM_CONFIG=/usr/bin/llvm-config-4.0"
+endif
+ifeq ($(SYSTEM),Darwin)
+	YARN_ENV=GYP_DEFINES="LLVM_CONFIG=/usr/bin/opt/llvm/bin/llvm-config"
+endif
+
+
+
 default: build
 
 ci: type lint test
 
 init:
-	yarn install
+	echo $(YARN_ENV) yarn install
+	$(YARN_ENV) yarn install
 	./node_modules/.bin/flow-typed install
 
 node_modules:
-	yarn install
+	$(YARN_ENV) yarn install
 
 flow-typed: node_modules
 	./node_modules/.bin/flow-typed install

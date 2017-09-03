@@ -3,6 +3,8 @@ machine:
     version: 7.3.0
 
 dependencies:
+  pre:
+    - sudo ./scripts/install-shared-libararies.bash
   override:
     - make init
   cache_directories:
