@@ -39,6 +39,7 @@
     "command-line-args": "^4.0.2",
     "flow-classy-type-wrapper": "^1.0.2",
     "fs-promise": "^2.0.2",
+    "llvm-node": "^2.0.4",
     "source-map-support": "^0.4.15"
   }
 }
