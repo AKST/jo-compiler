@@ -4,6 +4,7 @@ machine:
 
 dependencies:
   override:
+    - ./scripts/install-shared-libararies.bash
     - make init
   cache_directories:
     - ~/.cache/yarn
