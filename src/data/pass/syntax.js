@@ -80,6 +80,20 @@ export class IntegerSyntax extends Syntax {
   }
 }
 
+export class FloatSyntax extends Syntax {
+  static kind: string = 'float'
+  value: number
+
+  constructor (location: Location, value: number) {
+    super(location)
+    this.value = value
+  }
+
+  get __repr (): Object {
+    return { value: this.value }
+  }
+}
+
 export class StringSyntax extends Syntax {
   static kind: string = 'string'
   contents: string

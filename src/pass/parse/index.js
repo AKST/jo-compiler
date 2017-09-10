@@ -67,6 +67,7 @@ async function* loop (state: State): AsyncGenerator<Syntax, State, void> {
 const parseExpression: Reader = choiceOf(
   parseIdentifier,
   parseInteger,
+  parseFloat,
   parseString,
   parseCompoundExpression,
 )
@@ -121,7 +122,7 @@ async function parseInteger (initialState: State): Promise<ReadUpdate<Syntax>> {
   const token = await stateUpdate.current
 
   if (! (token instanceof lex.IntegerLexicon)) {
-    throw unexpectedLexicon.call(stateUpdate, token, lex.IdentifierLexicon)
+    throw unexpectedLexicon.call(stateUpdate, token, lex.IntegerLexicon)
   }
 
   return {
@@ -131,12 +132,27 @@ async function parseInteger (initialState: State): Promise<ReadUpdate<Syntax>> {
   }
 }
 
+async function parseFloat (initialState: State): Promise<ReadUpdate<Syntax>> {
+  let { update: stateUpdate } = await skipWhiteSpace(initialState)
+  const token = await stateUpdate.current
+
+  if (! (token instanceof lex.FloatLexicon)) {
+    throw unexpectedLexicon.call(stateUpdate, token, lex.FloatLexicon)
+  }
+
+  return {
+    // make sure if forgets about this token
+    update: await stateUpdate.shiftForward(),
+    value: init(syn.FloatSyntax, token.location, token.value),
+  }
+}
+
 async function parseString (initialState: State): Promise<ReadUpdate<Syntax>> {
   let { update: stateUpdate } = await skipWhiteSpace(initialState)
   const token = await stateUpdate.current
 
   if (! (token instanceof lex.StringLexicon)) {
-    throw unexpectedLexicon.call(stateUpdate, token, lex.IdentifierLexicon)
+    throw unexpectedLexicon.call(stateUpdate, token, lex.StringLexicon)
   }
 
   return {
@@ -145,3 +161,4 @@ async function parseString (initialState: State): Promise<ReadUpdate<Syntax>> {
     value: init(syn.StringSyntax, token.location, token.contents),
   }
 }
+
