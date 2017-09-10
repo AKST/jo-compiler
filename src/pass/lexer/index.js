@@ -106,7 +106,6 @@ function* branchInit (character: string, state: State): StateProcess {
   }
   else if (character === '"') {
     return state.shiftForward()
-      .dropBuffer()
       .setBranch(branchString)
   }
   else if (character === ')') {
@@ -171,7 +170,10 @@ function* branchString (character: string, state: State): StateProcess {
     return state.shiftForward()
   }
   else {
-    const content = state.enqueued
+    // it's worth remembering that the opening \" is
+    // also part of this token at the moment. So we
+    // can use substr to drop that from the representation
+    const content = state.enqueued.substr(1)
     const shifted = state.shiftForward()
     const location = shifted.location
     yield init(tokens.StringLexicon, content, location)

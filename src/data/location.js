@@ -48,6 +48,15 @@ export class Location {
     this.end = end
   }
 
+  shiftEndColumnBack (): Location {
+    const column = this.end.column - 1
+    if (column > 0) {
+      const e = init(Position, this.end.line, column)
+      return init(Location, this.start, e)
+    }
+    throw new TypeError('cannot back on column')
+  }
+
   static init (): Location {
     const s = Position.init()
     const e = Position.init()
