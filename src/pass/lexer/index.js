@@ -139,13 +139,29 @@ function* branchId (character: string, state: State): StateProcess {
 }
 
 function* branchInteger (character: string, state: State): StateProcess {
-  if (isNumber(character)) {
+  if (character === '.') {
+    return state.shiftForward()
+      .setBranch(branchFloat)
+  }
+  else if (isNumber(character)) {
     return state.shiftForward()
   }
   else {
     const value = parseInt(state.enqueued, 10)
     const location = state.location
     yield init(tokens.IntegerLexicon, value, location)
+    return state.dropBuffer().setBranch(branchInit)
+  }
+}
+
+function* branchFloat (character: string, state: State): StateProcess {
+  if (isNumber(character)) {
+    return state.shiftForward()
+  }
+  else {
+    const value = parseFloat(state.enqueued)
+    const location = state.location
+    yield init(tokens.FloatLexicon, value, location)
     return state.dropBuffer().setBranch(branchInit)
   }
 }

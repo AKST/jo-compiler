@@ -117,7 +117,7 @@ export class StringLexicon extends Lexicon {
  * Lexicon token that represents an integer
  */
 export class IntegerLexicon extends Lexicon {
-  static kind: string = 'interger'
+  static kind: string = 'integer'
   value: number
 
   constructor (value: number, location: Location) {
@@ -131,6 +131,27 @@ export class IntegerLexicon extends Lexicon {
 
   toString (): string {
     return `IntegerLexicon { value: ${this.value} }`
+  }
+}
+
+/**
+ * Lexicon token that represents an float
+ */
+export class FloatLexicon extends Lexicon {
+  static kind: string = 'float'
+  value: number
+
+  constructor (value: number, location: Location) {
+    super(location)
+    this.value = value
+  }
+
+  get __repr (): Object {
+    return { value: this.value }
+  }
+
+  toString (): string {
+    return `FloatLexicon { value: ${this.value} }`
   }
 }
 
