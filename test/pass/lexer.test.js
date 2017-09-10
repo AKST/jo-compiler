@@ -101,3 +101,16 @@ test('compound expression tokens', async (): Test => {
     new t.RParenLexicon(location([1, 10], [1, 11])),
   ])
 })
+
+test('line breaks', async (): Test => {
+  const input = asyncIter('  \n2 ')
+  const stream = tokenStream(input)
+
+  const tokens = await readAll(stream)
+  expect(tokens).toEqual([
+    // \s\s\n
+    new t.WhiteSpaceLexicon(3, location([1, 1], [2, 1])),
+    // 2
+    new t.IntegerLexicon(2, location([2, 1], [2, 2])),
+  ])
+})
