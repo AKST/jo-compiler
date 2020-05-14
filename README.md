@@ -1,3 +1,5 @@
+**YO I'm not maintaining this, & there are tons of security alerts mostly keeping this here for archiving sake**.
+
 # Proto Jo
 
 ## About
